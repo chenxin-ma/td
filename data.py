@@ -17,9 +17,12 @@ class StockHistory():
 		return self.symb
 
 
-	def getDf(self):
+	def getDf(self, begin, end):
 
-		return self.o0
+		if begin == '' and end == '':
+			return self.o0
+
+		return self.o0[(self.o0['datetime'] >= begin) & (self.o0['datetime'] <= end)]
 
 
 	def getHighestPrice(self, sinceIPO=False, daysBack=500, priceToUse='close'):

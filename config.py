@@ -1,6 +1,10 @@
 from pathlib import Path
 from os import path
 from enum import Enum
+from utils import *
+
+
+
 
 root = Path("/Users/chenxinma/Documents/projects/td/")
 datapath = root / 'data'
@@ -17,3 +21,11 @@ with open(root / "token/refresh_token.txt", 'r') as file:
 class POSITION(Enum):
 	EMPTY = 1
 	FULL = 2
+
+loggerpath = root / "logs/transactions.log"
+simLogPath = root / "logs/sim.log"
+logger = setup_logger('1', loggerpath, console=False)
+simLog = setup_logger('2', simLogPath, console=True)
+
+
+MAX_INTEGER = 999999999
