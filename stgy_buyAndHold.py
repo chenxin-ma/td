@@ -23,6 +23,6 @@ class Stgy_BAH(Stgy):
         winR, numTrans = self.getWinRatio()
         holdDays = self.getTotalHoldDays()
 
-        simLog.info('BAH, %s, %.3f, %.3f, %d, %.3f, %.3f %d' %(self.sh.getSymb(), currentValue, winR, numTrans, 
+        simLog.info('BAH, %s, %.3f, %.3f, %d, %.3f, %.3f, %d' %(self.sh.getSymb(), currentValue, winR, numTrans, 
                                 self.minValue, self.maxValue, holdDays))
 

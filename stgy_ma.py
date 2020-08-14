@@ -91,7 +91,7 @@ class Stgy_MA(Stgy):
         currentValue = self.getAccountValue(day)
         winR, numTrans = self.getWinRatio()
         holdDays = self.getTotalHoldDays()
-        simLog.info('MA, %s, %.3f, %.3f, %d, %.3f, %.3f %d' %(self.sh.getSymb(), currentValue, winR, numTrans, 
+        simLog.info('MA, %s, %.3f, %.3f, %d, %.3f, %.3f, %d' %(self.sh.getSymb(), currentValue, winR, numTrans, 
                                 self.minValue, self.maxValue, holdDays))
 
 
