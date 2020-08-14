@@ -1,5 +1,6 @@
 from pathlib import Path
 from os import path
+import os
 from enum import Enum
 from utils import *
 
@@ -20,7 +21,8 @@ with open(root / "token/refresh_token.txt", 'r') as file:
 
 class POSITION(Enum):
 	EMPTY = 1
-	FULL = 2
+	PARTIAL = 2
+	FULL = 3
 
 loggerpath = root / "logs/transactions.log"
 simLogPath = root / "logs/sim.log"

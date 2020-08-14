@@ -13,7 +13,7 @@ def main():
     # td.pullHistPriceForAllSymb()
     # td.pullTodayPriceForAll()
 
-    lSymb = 'ndx100'
+    lSymb = 'sp50'
     sybms = pd.read_csv(datapath / 'lists/{}.csv'.format(lSymb))['Symbol'].values
     beginDate = '2018-01-01'
     # sybms = ['AAL']
