@@ -2,7 +2,7 @@ from stgy import *
 
 class Stgy_MA(Stgy):
 
-    def __init__(self, sh, short=21, med=55, far=100, ema=False, priceToUse='close', init=10000):
+    def __init__(self, sh, short=5, med=10, far=20, farest=30, ema=False, priceToUse='close', init=10000):
         
         Stgy.__init__(self, sh, priceToUse, init)
         self.name = 'MA'
@@ -10,6 +10,7 @@ class Stgy_MA(Stgy):
         self.short = short
         self.med = med
         self.far = far
+        self.farest = farest
         self.ema = ema
         if ema:
             self.maType = 'ema'
@@ -19,8 +20,10 @@ class Stgy_MA(Stgy):
         self.columnShort = self.maType + str(short)
         self.columnMed = self.maType + str(med)
         self.columnFar = self.maType + str(far)
+        self.columnFarest = self.maType + str(farest)
 
         self.generateMAs()
+
 
 
     def generateMAs(self):
@@ -29,38 +32,59 @@ class Stgy_MA(Stgy):
             self.sh.getEMA(self.short, self.priceToUse)
             self.sh.getEMA(self.med, self.priceToUse)
             self.sh.getEMA(self.far, self.priceToUse)
+            self.sh.getEMA(self.farest, self.priceToUse)
         else:
             self.sh.getSMA(self.short, self.priceToUse)
             self.sh.getSMA(self.med, self.priceToUse)
             self.sh.getSMA(self.far, self.priceToUse)
+            self.sh.getSMA(self.farest, self.priceToUse)
         logger.debug('MA data for %s generated.' %self.sh.getSymb())
 
 
-    def buyCheck(self, day, lastDay):
+    def duoPai(self, day):
 
-        if self.pos == POSITION.FULL or lastDay is None:
-            return False
-
-        # MA55 should go up
-        if day[self.columnFar] <= lastDay[self.columnFar] * (1 + 0.001):
-            return False
-
-        if (day[self.priceToUse] > day[self.columnShort] and day[self.columnShort] > day[self.columnMed]):
-            logger.debug('%dSMA %.3f > %dSMA %.3f.' %(self.med, day[self.columnShort], self.far, day[self.columnMed]))
-            self.pos = POSITION.FULL
+        if (day[self.columnShort] > day[self.columnMed] > day[self.columnFar] > day[self.columnFarest]):
             return True
 
         return False
 
 
-    def sellCheck(self, day):
 
-        if self.pos == POSITION.EMPTY:
-            return False
+    def kongPai(self, day):
 
-        if (day[self.priceToUse] < day[self.columnShort]):
-            self.pos = POSITION.EMPTY
+        if day[self.columnShort] < day[self.columnMed] < day[self.columnFar]:
             return True
+            
+        return False
+
+
+    def isCrossDown(self, day, day2, day3):
+
+        if self.duoPai(day2) and self.duoPai(day3):
+            if day2[self.columnShort] > day2[self.columnMed] \
+            and day[self.columnShort] < day[self.columnMed]:
+                return True
+
+        return False
+
+
+    def isCrossUp(self, day, day2, day3):
+
+        if self.kongPai(day2) and self.kongPai(day3):
+            if day2[self.columnMed] < day2[self.columnFar] \
+            and day[self.columnMed] > day[self.columnFar]:
+                return True
+
+        return False
+
+
+    def isStrugle(self, day):
+
+        if abs(day[self.columnMed] - day[self.columnFar]) / day[self.columnFar] < 0.003 \
+        or abs(day[self.columnFar] - day[self.columnFarest]) / day[self.columnFarest] < 0.002:
+            return True
+
+        return False
 
 
 
@@ -69,24 +93,46 @@ class Stgy_MA(Stgy):
         if end == '':
             end = pd.Timestamp.now().strftime("%Y-%m-%d")
 
-        lastDay = None
-        for idx, day in self.sh.getDf(begin, end).iterrows():
+        df = self.sh.getDf(begin, end)
+
+        day = df.iloc[1]
+        dayM1 = df.iloc[0]
+
+
+        for i in range(2, len(df)):
+        # for idx, day in self.sh.getDf(begin, end).iterrows():
+
+            dayM2 = dayM1
+            dayM1 = day
+            day = df.iloc[i]
 
             # logger.debug('Simulation on date: %s.' %day['datetime'] )
             if pd.isna(day[self.columnFar]):
                 continue
 
-            buy = self.buyCheck(day, lastDay)
-            if buy:
-                self.action('buy', day) 
-                continue
 
-            sell = self.sellCheck(day)
-            if sell:
+            if self.pos == POSITION.EMPTY and self.duoPai(day):
+                if not self.isStrugle(day):
+                    self.action('buy', day) 
+                    self.pos = POSITION.FULL
+                    continue
+
+            if self.pos == POSITION.FULL and self.kongPai(day):
                 self.action('sell', day)
                 currentValue = self.getAccountValue(day)
+                self.pos = POSITION.EMPTY
+                continue
 
-            lastDay = day
+            if self.pos == POSITION.FULL and self.isCrossDown(day, dayM1, dayM2):
+                self.action('sell', day)
+                currentValue = self.getAccountValue(day)
+                self.pos = POSITION.EMPTY
+
+            elif self.pos == POSITION.EMPTY and self.isCrossUp(day, dayM1, dayM2):
+                self.action('buy', day) 
+                self.pos = POSITION.FULL
+
+
 
         currentValue = self.getAccountValue(day)
         winR, numTrans = self.getWinRatio()
