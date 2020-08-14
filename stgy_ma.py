@@ -63,31 +63,6 @@ class Stgy_MA(Stgy):
             return True
 
 
-    def action(self, do, day):
-
-        symb = self.sh.getSymb()
-        date = day['datetime'] 
-        if do == 'buy':
-            qty = self.balance['cash'] // day[self.priceToUse]
-            buyPrice = day[self.priceToUse]
-            self.buyPrice.append(buyPrice)
-
-            logger.info('MA %s %s %s %d %.3f' \
-                                    %(symb, do, date, qty, buyPrice) ) 
-            self.balance[symb] += qty
-            self.balance['cash'] -=  self.balance[symb] * buyPrice
-
-        elif do == 'sell':
-            qty = self.balance[symb]
-            sellPrice = day[self.priceToUse]
-            self.sellPrice.append(sellPrice)
-            transNet = self.sellPrice[-1] - self.buyPrice[-1]
-
-            logger.info('MA %s %s %s %d %.3f %.3f' \
-                                    %(symb, do, date, qty, sellPrice, transNet) ) 
-            self.balance['cash'] += self.balance[symb] * sellPrice
-            self.balance[symb] -= self.balance[symb]
-
 
     def simulation(self, begin='2000-01-01', end=''):
 
@@ -115,8 +90,9 @@ class Stgy_MA(Stgy):
 
         currentValue = self.getAccountValue(day)
         winR, numTrans = self.getWinRatio()
-        simLog.info('MA, %s, %.3f, %.3f, %d, %.3f, %.3f' %(self.sh.getSymb(), currentValue, winR, numTrans, 
-                                self.minValue, self.maxValue))
+        holdDays = self.getTotalHoldDays()
+        simLog.info('MA, %s, %.3f, %.3f, %d, %.3f, %.3f %d' %(self.sh.getSymb(), currentValue, winR, numTrans, 
+                                self.minValue, self.maxValue, holdDays))
 
 
 

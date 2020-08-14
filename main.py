@@ -13,7 +13,8 @@ def main():
     # td.pullHistPriceForAllSymb()
     # td.pullTodayPriceForAll()
 
-    sybms = pd.read_csv(datapath / 'lists/sp500.csv')['Symbol'].values
+    lSymb = 'sp500'
+    sybms = pd.read_csv(datapath / 'lists/{}.csv'.format(lSymb))['Symbol'].values
     beginDate = '2018-01-01'
     # sybms = ['AAL']
     for symb in sybms:
@@ -29,7 +30,9 @@ def main():
         stgy_BAH = Stgy_BAH(sh)
         stgy_BAH.simulation(begin=beginDate)
 
-        copyfile(simLogPath, root / 'res/{}.csv'.format(beginDate))
+    copyfile(simLogPath, root / 'res/{}_{}_sim.csv'.format(lSymb, beginDate))
+    copyfile(loggerpath, root / 'res/{}_{}_trans.txt'.format(lSymb, beginDate))
+
 
 if __name__ == "__main__":
 

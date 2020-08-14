@@ -18,9 +18,11 @@ class Stgy_BAH(Stgy):
 
         self.action('buy', day1)
         self.action('sell', dayN)
-        currentValue = self.getAccountValue(dayN)
 
+        currentValue = self.getAccountValue(dayN)
         winR, numTrans = self.getWinRatio()
-        simLog.info('BAH, %s, %.3f, %.3f, %d, %.3f, %.3f' %(self.sh.getSymb(), currentValue, winR, numTrans, 
-                                self.minValue, self.maxValue))
+        holdDays = self.getTotalHoldDays()
+
+        simLog.info('BAH, %s, %.3f, %.3f, %d, %.3f, %.3f %d' %(self.sh.getSymb(), currentValue, winR, numTrans, 
+                                self.minValue, self.maxValue, holdDays))
 

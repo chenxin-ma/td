@@ -14,6 +14,8 @@ class Stgy():
         self.balance = {'cash': init, self.sh.getSymb(): 0}
         self.buyPrice = []
         self.sellPrice = []
+        self.buyDate = []
+        self.sellDate = []
         self.maxValue = 0
         self.minValue = MAX_INTEGER
 
@@ -47,7 +49,12 @@ class Stgy():
         return winR, win + loss
 
 
+    def getTotalHoldDays(self):
 
+        days = 0
+        for i in range(len(self.sellDate)):
+            days += getDaysInterval(self.buyDate[i], self.sellDate[i])
+        return days
 
 
     def action(self, do, day):
@@ -59,22 +66,31 @@ class Stgy():
             qty = self.balance['cash'] // day[self.priceToUse]
             buyPrice = day[self.priceToUse]
             self.buyPrice.append(buyPrice)
+            self.buyDate.append(date)
 
             self.balance[symb] += qty
             self.balance['cash'] -=  self.balance[symb] * buyPrice
 
-            logger.info('%s %s %s %s %d %.3f' \
-                                    %(self.name, symb, do, date, qty, self.buyPrice[-1]) )
+            # logger.info('%s %s %s %s %d %.3f' \
+            #                         %(self.name, symb, do, date, qty, self.buyPrice[-1]) )
 
         elif do == 'sell':
             qty = self.balance[symb]
             sellPrice = day[self.priceToUse]
             self.sellPrice.append(sellPrice)
+            self.sellDate.append(date)
             transNet = sellPrice - self.buyPrice[-1]
+            holdDays = getDaysInterval(self.buyDate[-1], date)
 
             self.balance['cash'] += self.balance[symb] * sellPrice
             self.balance[symb] -= self.balance[symb]
 
-            logger.info('%s %s %s %s %d %.3f %.3f' \
-                                    %(self.name, symb, do, date, qty, sellPrice, transNet) ) 
+            # logger.info('%s %s %s %s %d %.3f %.3f %d' \
+            #                         %(self.name, symb, do, date, qty, sellPrice, transNet, holdDays) ) 
 
+            logger.info('%s %s buy %s %d %.3f sell %s %d %.3f %.3f %d' \
+                %(self.name, symb, self.buyDate[-1], qty, self.buyPrice[-1], 
+                   date, qty, sellPrice, transNet, holdDays) )
+
+
+            

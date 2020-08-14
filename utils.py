@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 
 
 formatter = logging.Formatter('[%(levelname)s] %(message)s')
@@ -27,3 +28,12 @@ def setup_logger(name, log_file, level=logging.INFO, console=True):
 	    logger.addHandler(logging.StreamHandler())
 
     return logger
+
+
+
+def getDaysInterval(str1, str2):
+
+	date_format = "%Y-%m-%d"
+	a = datetime.strptime(str1, date_format)
+	b = datetime.strptime(str2, date_format)
+	return (b - a).days
