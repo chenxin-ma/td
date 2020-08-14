@@ -35,12 +35,16 @@ class Stgy():
         win = 0
         loss = 0
         for i in range(len(self.sellPrice)):
-            if self.buyPrice[i] >= self.sellPrice[i]:
+            if self.buyPrice[i] <= self.sellPrice[i]:
                 win += 1
             else:
                 loss += 1
 
-        return win / (win + loss), win + loss
+        if win + loss == 0:
+            winR = 0
+        else:
+            winR = win / (win + loss)
+        return winR, win + loss
 
 
 
