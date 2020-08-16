@@ -111,7 +111,6 @@ class Stgy_MA(Stgy):
             dayM2 = dayM1
             dayM1 = day
             day = df.iloc[i]
-            action = 0
 
             # logger.debug('Simulation on date: %s.' %day['datetime'] )
             if pd.isna(day[self.columnFar]):
@@ -121,65 +120,28 @@ class Stgy_MA(Stgy):
             if self.pos == POSITION.EMPTY and self.duoPai(day) and not self.duoPai(dayM1):
                 if not self.isStrugle(day):
                     self.action('buy', day) 
-                    self.pos = POSITION.FULL
-                    action == 1
 
             if self.pos == POSITION.FULL and self.kongPai(day):
                 self.action('sell', day)
-                self.pos = POSITION.EMPTY
-                action == 1
 
-            if action == 0 and self.pos == POSITION.FULL and self.isCrossDown(day, dayM1, dayM2):
+            if self.pos == POSITION.FULL and self.isCrossDown(day, dayM1, dayM2):
                 self.action('sell', day)
-                self.pos = POSITION.EMPTY
-                action == 1
 
-            elif action == 0 and self.pos == POSITION.EMPTY and self.isCrossUp(day, dayM1, dayM2):
+            elif self.pos == POSITION.EMPTY and self.isCrossUp(day, dayM1, dayM2):
                 self.action('buy', day) 
-                self.pos = POSITION.FULL
-                action == 1
 
-            if action == 0 and self.pos == POSITION.FULL and self.tooHigh(day):
-                self.action('sell', day)
-                self.pos = POSITION.EMPTY
-                action == 1
+            # if self.pos == POSITION.FULL and self.tooHigh(day):
+                # self.action('sell', day)
 
             df.loc[i, 'value'] = self.getAccountValue(day)
 
         currentValue = self.getAccountValue(day)
         winR, numTrans = self.getWinRatio()
         holdDays = self.getTotalHoldDays()
-        self.plot(df)
-        simLog.info('MA, %s, %.3f, %.3f, %d, %.3f, %.3f, %d' %(self.sh.getSymb(), currentValue, winR, numTrans, 
+        if drawing:
+            self.plot(df)
+        simLog.info('%s, %s, %.3f, %.3f, %d, %.3f, %.3f, %d' %(self.name, 
+                                self.sh.getSymb(), currentValue, winR, numTrans, 
                                 self.minValue, self.maxValue, holdDays))
 
 
-
-    def plot(self, df):
-
-        fig, axs = plt.subplots(figsize=(12, 7), nrows=2, ncols=1)
-
-        axs[0].plot(df['datetime'], df['close'], color='red')
-        # axs[0].plot(df['datetime'], df[self.columnShort], color='cyan')
-        # axs[0].plot(df['datetime'], df[self.columnMed], color='deepskyblue')
-        # axs[0].plot(df['datetime'], df[self.columnFar], color='plum')
-        # axs[0].plot(df['datetime'], df[self.columnFarest], color='purple')
-        axs[0].plot(self.buyDate, df[df['datetime'].isin(self.buyDate)]['close'],
-                                     '^', markersize=10, color='m')
-        axs[0].plot(self.sellDate, df[df['datetime'].isin(self.sellDate)]['close'],
-                                     'v', markersize=10, color='black')
-        axs[0].set_xticks(axs[0].get_xticks()[::100])
-
-        axs[1].plot(df['datetime'], df['value'])
-        axs[1].plot(self.buyDate, df[df['datetime'].isin(self.buyDate)]['value'],
-                                     '^', markersize=10, color='m')
-        axs[1].plot(self.sellDate, df[df['datetime'].isin(self.sellDate)]['value'],
-                                     'v', markersize=10, color='black')
-        axs[1].set_xticks(axs[1].get_xticks()[::100])
-
-
-        figPath = root / 'res/plots/{}'.format(self.name)
-        if not os.path.exists(figPath):
-            os.makedirs(figPath)
-        plt.savefig(figPath / '{}.png'.format(self.sh.getSymb()))
-        plt.close()

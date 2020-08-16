@@ -3,6 +3,7 @@ from tqdm import tqdm
 from tdapi import *
 from data import *
 from stgy_ma import Stgy_MA
+from stgy_breakout import Stgy_BO
 from stgy_buyAndHold import Stgy_BAH
 from shutil import copyfile
 
@@ -10,13 +11,13 @@ def main():
 
 
     # td = TDAPI()
-    # td.pullHistPriceForAllSymb()
+    # #td.pullHistPriceForAllSymb()
     # td.pullTodayPriceForAll()
 
     lSymb = 'sp50'
     sybms = pd.read_csv(datapath / 'lists/{}.csv'.format(lSymb))['Symbol'].values
     beginDate = '2018-01-01'
-    # sybms = ['AAL']
+    # sybms = ['NFLX']
     for symb in sybms:
         o0 = pd.read_csv(datapath / 'historical_daily/single/{}.csv'.format(symb), 
                      dtype={'open': 'float', 'high': 'float', 'low': 'float', 'close': 'float',
@@ -24,8 +25,11 @@ def main():
 
         sh = StockHistory(o0, symb)
 
-        stgy_MA = Stgy_MA(sh)
-        stgy_MA.simulation(begin=beginDate)
+        # stgy_MA = Stgy_MA(sh)
+        # stgy_MA.simulation(begin=beginDate)
+
+        stgy_BO = Stgy_BO(sh)
+        stgy_BO.simulation(begin=beginDate)
 
         stgy_BAH = Stgy_BAH(sh)
         stgy_BAH.simulation(begin=beginDate)

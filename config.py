@@ -24,6 +24,10 @@ class POSITION(Enum):
 	PARTIAL = 2
 	FULL = 3
 
+
+class ERROR(Enum):
+	NOT_ENOUGH_HISTORY = 1
+
 loggerpath = root / "logs/transactions.log"
 simLogPath = root / "logs/sim.log"
 logger = setup_logger('1', loggerpath, console=False)
@@ -31,3 +35,5 @@ simLog = setup_logger('2', simLogPath, console=True)
 
 
 MAX_INTEGER = 999999999
+drawing = True
+
