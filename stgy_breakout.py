@@ -19,6 +19,7 @@ class Stgy_BO(Stgy):
         self.jianCangZhiYingThres = [1.01, 1.04, 1.12, 1.2, 1.25, 1.4]
         self.jianCangIdx = 0
 
+        self.lastBuyPrice = 0
 
     def rebalanceJianCangThres(self, vol):
 
@@ -44,7 +45,7 @@ class Stgy_BO(Stgy):
 
     def stopSellCheck(self, day):
 
-        if day[self.priceToUse] < self.buyPrice[-1] * (1 - self.stopR):
+        if day[self.priceToUse] < self.lastBuyPrice * (1 - self.stopR):
             return True
 
         return False
@@ -54,14 +55,14 @@ class Stgy_BO(Stgy):
 
         jianCangPct = 0
         while (self.jianCangIdx < len(self.jianCangProfitThres) ):
-            if day[self.priceToUse] >= self.buyPrice[-1] * self.jianCangProfitThres[self.jianCangIdx]:
+            if day[self.priceToUse] >= self.lastBuyPrice * self.jianCangProfitThres[self.jianCangIdx]:
                 jianCangPct += self.jianCangPos[self.jianCangIdx]
                 self.jianCangIdx += 1
             else:
                 break
 
         if self.jianCangIdx > 0 and self.jianCangIdx < len(self.jianCangProfitThres):
-            if day[self.priceToUse] / self.buyPrice[-1] < self.jianCangZhiYingThres[self.jianCangIdx - 1]:
+            if day[self.priceToUse] / self.lastBuyPrice < self.jianCangZhiYingThres[self.jianCangIdx - 1]:
                 return 1
 
         return min(jianCangPct, 1)
@@ -91,6 +92,7 @@ class Stgy_BO(Stgy):
             if self.pos == POSITION.EMPTY and self.buyCheck(day, len(df) - i):
                 self.action('buy', day) 
                 self.jianCangIdx = 0
+                self.lastBuyPrice = day[self.priceToUse]
 
             if self.pos == POSITION.FULL and self.stopSellCheck(day):
                 self.action('sell', day)
@@ -105,12 +107,14 @@ class Stgy_BO(Stgy):
             df.loc[i, 'value'] = self.getAccountValue(day)
 
         currentValue = self.getAccountValue(day)
-
+        winR, numTrans = self.getWinRatio()
+        holdDays = self.getTotalHoldDays()
+        
         if drawing:
             self.plot(df)
         simLog.info('%s, %s, %.3f, %.3f, %d, %.3f, %.3f, %d' %(self.name, 
-                                self.sh.getSymb(), currentValue, -1, -1, 
-                                self.minValue, self.maxValue, -1))
+                                self.sh.getSymb(), currentValue, winR, numTrans, 
+                                self.minValue, self.maxValue, holdDays))
 
 
 

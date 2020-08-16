@@ -13,10 +13,8 @@ class Stgy():
         self.priceToUse = priceToUse
         self.pos = POSITION.EMPTY
         self.balance = {'cash': init, self.sh.getSymb(): 0}
-        self.buyPrice = []
-        self.sellPrice = []
-        self.buyDate = []
-        self.sellDate = []
+        self.actionBook = {'actions':[]}
+
         self.maxValue = 0
         self.minValue = MAX_INTEGER
 
@@ -37,26 +35,62 @@ class Stgy():
 
         win = 0
         loss = 0
-        for i in range(len(self.sellPrice)):
-            if self.buyPrice[i] <= self.sellPrice[i]:
-                win += 1
-            else:
-                loss += 1
+        i = 0
+        while i < len(self.actionBook['actions']):
+            
+            action = self.actionBook['actions'][i]
+            if action['type'] == 'buy':
+                buyPrice = action['price']
+            
+            firstSellPrice = -1
 
-        if win + loss == 0:
-            winR = 0
-        else:
-            winR = win / (win + loss)
+            i += 1
+            while i < len(self.actionBook['actions']):
+                action = self.actionBook['actions'][i]
+
+                if action['type'] == 'sell' and firstSellPrice == -1:
+                    firstSellPrice = action['price']
+                    if (buyPrice > firstSellPrice):
+                        loss += 1
+                    else:
+                        win += 1
+                if (firstSellPrice != -1 and action['type'] == 'buy' or i == len(self.actionBook['actions']) - 1):
+                    break 
+                i += 1
+
+        winR = 0 if win + loss == 0 else win / (win + loss)
+
         return winR, win + loss
 
 
     def getTotalHoldDays(self):
 
         days = 0
-        for i in range(len(self.sellDate)):
-            days += getDaysInterval(self.buyDate[i], self.sellDate[i])
+        i = 0
+
+        while i < len(self.actionBook['actions']):
+            action = self.actionBook['actions'][i]
+
+            if action['type'] == 'buy':
+                buyDate = action['date']
+            
+            LastSellDate = ''
+            i += 1
+            while i < len(self.actionBook['actions']):
+                action = self.actionBook['actions'][i]
+                if action['type'] == 'sell':
+                    LastSellDate = action['date']
+                if (LastSellDate != '' and action['type'] == 'buy' or i == len(self.actionBook['actions']) - 1):
+                    days += getDaysInterval(buyDate, LastSellDate)
+                    break 
+                i += 1
+
         return days
 
+
+    def actionToBook(self, do, day, price, qty):
+        self.actionBook['actions'].append({'type': do, 'date': day['datetime'], 
+                                         'price': price, 'qty': qty})
 
     def action(self, do, day, percent=1, priceToUse=''):
 
@@ -68,8 +102,8 @@ class Stgy():
         if do == 'buy':
             qty = self.balance['cash'] * percent // day[priceToUse]
             buyPrice = day[priceToUse]
-            self.buyPrice.append(buyPrice)
-            self.buyDate.append(date)
+
+            self.actionToBook(do, day, buyPrice, qty)
 
             self.balance[symb] += qty
             self.balance['cash'] -=  self.balance[symb] * buyPrice
@@ -80,7 +114,7 @@ class Stgy():
                 self.pos = POSITION.PARTIAL
 
             logger.info('%s %s %s %s %d %.3f' \
-                                    %(self.name, symb, do, date, qty, self.buyPrice[-1]) )
+                                    %(self.name, symb, do, date, qty, buyPrice) )
 
         elif do == 'sell':
 
@@ -98,8 +132,7 @@ class Stgy():
             if qty == 0:
                 return 
 
-            self.sellPrice.append(sellPrice)
-            self.sellDate.append(date)
+            self.actionToBook(do, day, sellPrice, qty)
             # transNet = sellPrice - self.buyPrice[-1]
             # holdDays = getDaysInterval(self.buyDate[-1], date)
 
@@ -119,6 +152,14 @@ class Stgy():
     def plot(self, df):
 
         fig, axs = plt.subplots(figsize=(12, 7), nrows=2, ncols=1)
+
+        self.buyDate = []
+        self.sellDate = []
+        for action in self.actionBook['actions']:
+            if action['type'] == 'buy':
+                self.buyDate.append(action['date'])
+            else:
+                self.sellDate.append(action['date'])
 
         axs[0].plot(df['datetime'], df['close'], color='red')
         # axs[0].plot(df['datetime'], df[self.columnShort], color='cyan')
