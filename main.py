@@ -5,6 +5,7 @@ from data import *
 from stgy_ma import Stgy_MA
 from stgy_breakout import Stgy_BO
 from stgy_buyAndHold import Stgy_BAH
+from stgy_cupHandle import Stgy_CH
 from shutil import copyfile
 
 def main():
@@ -28,11 +29,14 @@ def main():
         # stgy_MA = Stgy_MA(sh)
         # stgy_MA.simulation(begin=beginDate)
 
-        stgy_BO = Stgy_BO(sh)
-        stgy_BO.simulation(begin=beginDate)
+        # stgy_BO = Stgyx_BO(sh)
+        # stgy_BO.simulation(begin=beginDate)
 
-        stgy_BAH = Stgy_BAH(sh)
-        stgy_BAH.simulation(begin=beginDate)
+        stgy_CH = Stgy_CH(sh, '2013-01-01')
+        stgy_CH.simulation(begin=beginDate)
+
+        # stgy_BAH = Stgy_BAH(sh)
+        # stgy_BAH.simulation(begin=beginDate)
 
     copyfile(simLogPath, root / 'res/{}_{}_sim.csv'.format(lSymb, beginDate))
     copyfile(loggerpath, root / 'res/{}_{}_trans.txt'.format(lSymb, beginDate))

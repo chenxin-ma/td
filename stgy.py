@@ -5,10 +5,13 @@ import matplotlib.pyplot as plt
 
 class Stgy():
 
-    def __init__(self, sh, priceToUse='close', init=10000):
+    def __init__(self, sh, date_start='', priceToUse='close', init=10000):
 
         self.name = 'empty'
-        self.sh = sh 
+        self.sh = sh.__copy__()
+        if date_start != '':
+            self.sh.cutFromDate(date_start) 
+
 
         self.priceToUse = priceToUse
         self.pos = POSITION.EMPTY
