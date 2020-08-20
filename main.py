@@ -13,7 +13,7 @@ def main():
 
     td = TDAPI()
     # td.pullHistPriceForAll()
-    td.pullOptionDfForAll(its=1)
+    td.pullOptionDfForAll(['XNET'])
     # td.pullTodayPriceForAllBatch()
     # $td.pullTodayPrice('ABCB')
     return 

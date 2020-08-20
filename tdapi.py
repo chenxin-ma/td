@@ -75,7 +75,7 @@ class TDAPI:
                     oSymb.to_csv(datapath / 'historical_daily/single/{}.csv'.format(symb), 
                                             index=False, float_format='%.3f')
                 except:
-                    logging.warning('%s fails to update today.' %symb)
+                    logger.warning('%s fails to update today.' %symb)
                     print(symb)
                     continue
 
@@ -109,14 +109,14 @@ class TDAPI:
 
 
 
-    def pullOptionDfForAll(self, symbList=[], its=1):
+    def pullOptionDfForAll(self, symbList=[]):
         
         cols = ['putCall','description','bid','ask',
             'totalVolume','openInterest','strikePrice','expirationDate']
         today_date = pd.Timestamp.now().strftime("%Y-%m-%d")
 
         if (len(symbList) == 0):
-            sybms = pd.read_csv(datapath / 'symbols/all.csv')['Symbol'].values
+            sybms = pd.read_csv(datapath / 'symbols/options.csv')['Symbol'].values
         else:
             sybms = symbList
 
@@ -124,14 +124,14 @@ class TDAPI:
         if not os.path.exists(savepath):
             os.makedirs(savepath)
 
-        for it in range(its):
-            for i in tqdm(range(len(sybms))):
-                symb = sybms[i] 
+        for i in tqdm(range(len(sybms))):
+            symb = sybms[i] 
+            while 1:
                 try:
                     filename = savepath / '{}.csv'.format(symb)
 
                     if path.exists(filename):
-                        continue
+                        break
 
                     o0 = self.client.optionsDF(symb)
 
@@ -139,6 +139,7 @@ class TDAPI:
                     o0['expirationDate'] = o0['expirationDate'].dt.date
 
                     o0.to_csv(filename, index=False, float_format='%.3f')
+                    break
                 except:
                     continue
 
