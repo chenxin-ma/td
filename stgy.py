@@ -164,6 +164,7 @@ class Stgy():
             else:
                 self.sellDate.append(action['date'])
 
+
         axs[0].plot(df['datetime'], df['close'], color='red')
         # axs[0].plot(df['datetime'], df[self.columnShort], color='cyan')
         # axs[0].plot(df['datetime'], df[self.columnMed], color='deepskyblue')

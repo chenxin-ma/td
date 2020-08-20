@@ -31,9 +31,9 @@ class ERROR(Enum):
 loggerpath = root / "logs/transactions.log"
 simLogPath = root / "logs/sim.log"
 logger = setup_logger('1', loggerpath, console=False)
-simLog = setup_logger('2', simLogPath, console=True)
+simLog = setup_logger('2', simLogPath, console=False)
 
 
 MAX_INTEGER = 999999999
-drawing = True
+drawing = False
 

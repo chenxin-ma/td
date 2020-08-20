@@ -13,9 +13,12 @@ class TDAPI:
         self.client = td.TDClient(consumer_id, refresh_token, access_token, [account_id])
 
 
-    def pullHistPriceForAll(self):
+    def pullHistPriceForAll(self, symbList=[]):
         
-        sybms = pd.read_csv(datapath / 'symbols/all.csv')['Symbol'].values
+        if (len(symbList) == 0):
+            sybms = pd.read_csv(datapath / 'symbols/all.csv')['Symbol'].values
+        else:
+            sybms = symbList
 
         for i in tqdm(range(len(sybms))):
             symb = sybms[i] 
@@ -38,7 +41,8 @@ class TDAPI:
                 continue
 
 
-    def pullTodayPriceForAll(self):
+
+    def pullTodayPriceForAllBatch(self):
 
         symbAll = [f[:-4] for f in listdir(datapath / 'historical_daily/single/') 
                  if isfile(join(datapath / 'historical_daily/single', f)) and f.endswith('.csv')]
@@ -71,5 +75,72 @@ class TDAPI:
                     oSymb.to_csv(datapath / 'historical_daily/single/{}.csv'.format(symb), 
                                             index=False, float_format='%.3f')
                 except:
-                    logging.warning('%s fails to update today.')
+                    logging.warning('%s fails to update today.' %symb)
+                    print(symb)
                     continue
+
+
+
+
+    def pullTodayPrice(self, symb):
+
+
+        today_date = pd.Timestamp.now().strftime("%Y-%m-%d")
+
+
+        oBatch = self.client.quoteDF(symb)
+        oBatch['datetime'] = today_date
+
+        oBatch_ = oBatch[['symbol','openPrice','highPrice','lowPrice','regularMarketLastPrice',
+                                'totalVolume','datetime']].copy()
+        oBatch_ = oBatch_.round(3)
+
+        oSymb = pd.read_csv(datapath / 'historical_daily/single/{}.csv'.format(symb))
+
+        if oSymb.iloc[-1]['datetime'] == today_date:
+            oSymb = oSymb.iloc[:-1].copy()
+
+        rowToday = oBatch_.iloc[0][['openPrice','highPrice','lowPrice','regularMarketLastPrice',
+                            'totalVolume','datetime']].values
+
+        oSymb.loc[len(oSymb)] = rowToday
+        oSymb.to_csv(datapath / 'historical_daily/single/{}.csv'.format(symb), 
+                                index=False, float_format='%.3f')
+
+
+
+    def pullOptionDfForAll(self, symbList=[], its=1):
+        
+        cols = ['putCall','description','bid','ask',
+            'totalVolume','openInterest','strikePrice','expirationDate']
+        today_date = pd.Timestamp.now().strftime("%Y-%m-%d")
+
+        if (len(symbList) == 0):
+            sybms = pd.read_csv(datapath / 'symbols/all.csv')['Symbol'].values
+        else:
+            sybms = symbList
+
+        savepath = datapath / 'historical_option_daily/single/{}'.format(today_date)
+        if not os.path.exists(savepath):
+            os.makedirs(savepath)
+
+        for it in range(its):
+            for i in tqdm(range(len(sybms))):
+                symb = sybms[i] 
+                try:
+                    filename = savepath / '{}.csv'.format(symb)
+
+                    if path.exists(filename):
+                        continue
+
+                    o0 = self.client.optionsDF(symb)
+
+                    o0 = o0[cols]
+                    o0['expirationDate'] = o0['expirationDate'].dt.date
+
+                    o0.to_csv(filename, index=False, float_format='%.3f')
+                except:
+                    continue
+
+
+

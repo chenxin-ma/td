@@ -13,7 +13,7 @@ class Stgy_CH(Stgy):
 
         self.jianCangProfitThres = [1.05, 1.1, 1.2, 1.3, 1.4, 1.5]
         self.jianCangPos = [0.1, 0.25, 0.3, 0.15, 0.1, 1]
-        self.jianCangZhiYingThres = [1.01, 1.04, 1.12, 1.2, 1.25, 1.4]
+        self.jianCangZhiYingThres = [1.01, 1.04, 1.12, 1.2, 1.2, 1.2]
         self.jianCangIdx = 0
 
         self.lastBuyPrice = 0
@@ -21,7 +21,7 @@ class Stgy_CH(Stgy):
 
     def buyCheck(self, day, df, i):
 
-        dfWindow = df.iloc[:i]
+        dfWindow = df.iloc[:i+1]
         today = day['high']
 
         prevHigh = today * (1 + self.prevHighThres)
@@ -29,17 +29,23 @@ class Stgy_CH(Stgy):
         resistantBoxHigh = today * (1 + self.prevNearThres)
         
         daysToPrevHighIdx = dfWindow[dfWindow['high'].gt(prevHigh)].index
-
         if len(daysToPrevHighIdx) == 0:
             return False
 
-        daysToPrevHigh = len(dfWindow) - daysToPrevHighIdx[-1]
+        earliestHighIdx = 1
+        for i in range(len(daysToPrevHighIdx) - 1):
+            if dfWindow.iloc[daysToPrevHighIdx[-i-2] : daysToPrevHighIdx[-i-1]]['high'].max() <= prevHigh:
+                earliestHighIdx = i + 2
+            else:
+                break
+
+        daysToPrevHigh = len(dfWindow) - daysToPrevHighIdx[-earliestHighIdx]
         if daysToPrevHigh < 20:
             return False
 
-        dfFocus = dfWindow.iloc[daysToPrevHighIdx[-1]:]
-        inBoxIdx = dfFocus[(dfFocus['close'].gt(resistantBoxLow)) \
-                     & (dfFocus['close'].lt(resistantBoxHigh))].index
+        dfFocus = dfWindow.iloc[daysToPrevHighIdx[-earliestHighIdx]:]
+        inBoxIdx = dfFocus[(dfFocus['high'].gt(resistantBoxLow))].index
+
 
         prevIdx = -1
         drawdownCount = 0
@@ -49,8 +55,9 @@ class Stgy_CH(Stgy):
                 prevIdx = idx
                 continue
 
-            if (idx - prevIdx >= 3):
+            if (idx - prevIdx >= 5):
                 lowInStint = dfFocus.loc[prevIdx : idx]['low'].min()
+                # print(day['datetime'], inBoxIdx, daysToPrevHigh, idx)
 
                 if lowInStint < resistantBoxLow * 0.95:
                     drawdownCount += 1
@@ -98,6 +105,9 @@ class Stgy_CH(Stgy):
 
 
         df = self.sh.getDf().copy().reset_index()
+        if (len(df) == 0):
+            return
+
         df['value'] = self.balance['cash']
 
         simDays = len(self.sh.getDf(begin, end))
@@ -121,7 +131,7 @@ class Stgy_CH(Stgy):
 
             df.loc[i, 'value'] = self.getAccountValue(day)
 
-        currentValue = self.getAccountValue(day)
+        currentValue = df.iloc[-1]['value']
         winR, numTrans = self.getWinRatio()
         holdDays = self.getTotalHoldDays()
         

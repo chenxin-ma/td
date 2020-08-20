@@ -11,15 +11,19 @@ from shutil import copyfile
 def main():
 
 
-    # td = TDAPI()
-    # #td.pullHistPriceForAllSymb()
-    # td.pullTodayPriceForAll()
+    td = TDAPI()
+    # td.pullHistPriceForAll()
+    td.pullOptionDfForAll(its=1)
+    # td.pullTodayPriceForAllBatch()
+    # $td.pullTodayPrice('ABCB')
+    return 
 
-    lSymb = 'sp50'
+    lSymb = 'forest'
     sybms = pd.read_csv(datapath / 'lists/{}.csv'.format(lSymb))['Symbol'].values
-    beginDate = '2018-01-01'
-    # sybms = ['NFLX']
-    for symb in sybms:
+    beginDate = '2020-08-18'
+    # sybms = ['THC']
+    for idx, symb in enumerate(tqdm(sybms)):
+
         o0 = pd.read_csv(datapath / 'historical_daily/single/{}.csv'.format(symb), 
                      dtype={'open': 'float', 'high': 'float', 'low': 'float', 'close': 'float',
                            'datetime': 'str', 'symb': 'str'})
@@ -32,7 +36,7 @@ def main():
         # stgy_BO = Stgyx_BO(sh)
         # stgy_BO.simulation(begin=beginDate)
 
-        stgy_CH = Stgy_CH(sh, '2013-01-01')
+        stgy_CH = Stgy_CH(sh, '2019-01-01')
         stgy_CH.simulation(begin=beginDate)
 
         # stgy_BAH = Stgy_BAH(sh)
