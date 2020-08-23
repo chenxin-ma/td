@@ -141,6 +141,8 @@ class TDAPI:
                     o0.to_csv(filename, index=False, float_format='%.3f')
                     break
                 except:
+
+                    time.sleep(0.1)
                     continue
 
 
