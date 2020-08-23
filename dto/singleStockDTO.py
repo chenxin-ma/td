@@ -4,7 +4,7 @@ import logging
 import talib
 
 
-class StockHistory():
+class SingleStockDTO():
 
     def __init__(self, df, symb):
 
@@ -13,7 +13,7 @@ class StockHistory():
 
 
     def __copy__(self):
-        return StockHistory(self.o0.copy(), self.symb)
+        return SingleStockDTO(self.o0.copy(), self.symb)
         
 
     def cutFromDate(self, date_start):
