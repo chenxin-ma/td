@@ -31,3 +31,23 @@ class BalanceBook:
             holding.append(symb)
 
         return holding
+
+
+    def update(self, symb, shares, price):
+
+        if symb not in self.balance:
+            self.balance[symb] = shares
+
+        else:
+            self.balance[symb] += shares
+
+        if self.balance[symb] == 0:
+            del self.balance[symb]
+            
+        if self.balance[symb] < 0:
+            logger.error('BalanceBook: short a symb(%s) is not supported yet!' %(symb) )
+
+
+        self.balance['cash'] -= shares * price
+        if self.balance['cash'] < 0:
+            logger.error('BalanceBook: Margin account is not supported yet!' )

@@ -28,3 +28,20 @@ class Simulator:
 
     	value += self.balanceBook.getCash()
         return value
+
+
+    def action(self, do, symb, price, shares, date):
+
+	    self.actionBook.update(do, symb, price, shares, date)
+
+    	if do == 'sell':
+	    	shares = -shares
+
+	    self.balanceBook.update(symb, shares)
+
+        transLog.info('%s %s %s %d %.3f' \
+                     %(do, symb, date, shares, price) )
+
+
+
+

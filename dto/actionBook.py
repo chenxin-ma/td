@@ -11,4 +11,14 @@ class ActionBook:
             logger.error('ActionBook: symb %s not exsits!')
             return None
 
-        return self.actions['symb']
+        return self.actions[symb]
+
+
+
+    def update(self, do, symb, price, shares, date):
+
+    	if symb not in self.actions:
+    		self.actions[symb] = []
+
+        self.actions[symb].append({'type': do, 'date': date, 
+                             'price': price, 'shares': shares})
