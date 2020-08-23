@@ -1,6 +1,7 @@
 import pandas as pd
 from config.config import *
-from dto import *
+from dto.singleStockDTO import SingleStockDTO
+from dto.multiStockDTO import MultiStockDTO
 
 class DataLoader:
 
@@ -30,13 +31,13 @@ class DataLoader:
 
             oSymb = pd.read_csv(filePath, dtype=loadFormat)
 
-            sh = SingleStockDTO(oSymb, symb)
+            ssd = SingleStockDTO(oSymb, symb)
             if self.firstDay != '':
-                sh.cutFromDate(self.firstDay) 
+                ssd.cutFromDate(self.firstDay) 
 
-            lastDates.add(sh.getDf().iloc[-1]['datetime'])
+            lastDates.add(ssd.getDf().iloc[-1]['datetime'])
 
-            dailyData[symb] = sh
+            dailyData[symb] = ssd
 
         if len(lastDates) == 1:
             logger.info('DataLoader: loading %d stocks, all good.' %(len(self.symbs)))
