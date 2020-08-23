@@ -2,8 +2,9 @@ from pathlib import Path
 from os import path
 import os
 from enum import Enum
-from utils import *
+from util.utils import *
 import time
+from tqdm import tqdm
 
 
 

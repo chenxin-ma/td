@@ -1,6 +1,5 @@
 import tdameritrade as td
-from config import *
-from tqdm import tqdm
+from config.config import *
 import pandas as pd
 from os import listdir
 from os.path import isfile, join

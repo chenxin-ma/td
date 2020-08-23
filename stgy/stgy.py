@@ -1,6 +1,6 @@
 import pandas as pd
-from config import *
 import matplotlib.pyplot as plt
+from config.config import *
 
 
 class Stgy():

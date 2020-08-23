@@ -1,22 +1,26 @@
 import os
 from tqdm import tqdm
-from tdapi import *
-from data import *
-from stgy_ma import Stgy_MA
-from stgy_breakout import Stgy_BO
-from stgy_buyAndHold import Stgy_BAH
-from stgy_cupHandle import Stgy_CH
 from shutil import copyfile
+from config.config import *
+from api import *
+from dto import *
+from stgy import *
+import pandas as pd
+import argparse
 
-def main():
+
+def updateDB():
 
 
     td = TDAPI()
     # td.pullHistPriceForAll()
-    td.pullOptionDfForAll()
+    # td.pullOptionDfForAll()
     # td.pullTodayPriceForAllBatch()
-    # $td.pullTodayPrice('ABCB')
-    return 
+    # td.pullTodayPrice('ABCB')
+
+
+def main():
+
 
     lSymb = 'forest'
     sybms = pd.read_csv(datapath / 'lists/{}.csv'.format(lSymb))['Symbol'].values
@@ -28,7 +32,7 @@ def main():
                      dtype={'open': 'float', 'high': 'float', 'low': 'float', 'close': 'float',
                            'datetime': 'str', 'symb': 'str'})
 
-        sh = StockHistory(o0, symb)
+        sh = SingleStockDTO(o0, symb)
 
         # stgy_MA = Stgy_MA(sh)
         # stgy_MA.simulation(begin=beginDate)
@@ -47,5 +51,11 @@ def main():
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-m', '--mode', type=str, required=True, help="")
+    args = parser.parse_args()
 
-    main()
+    if args.mode == '1':
+        main()
+    elif args.mode == '2':
+        updateDB()

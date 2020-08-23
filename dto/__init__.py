@@ -1,0 +1,1 @@
+from .singleStockDTO import SingleStockDTO
