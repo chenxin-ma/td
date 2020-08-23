@@ -1,1 +1,2 @@
-from .stgy_buy import *
+from .stgyBuy import *
+from .stgyBuyQuan import *
