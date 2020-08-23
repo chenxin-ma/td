@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 
 
-formatter = logging.Formatter('[%(levelname)s] %(message)s')
+formatter = logging.Formatter('[%(asctime)s] [%(levelname)s] [%(name)s] %(message)s')
 
 
 
@@ -24,8 +24,11 @@ def setup_logger(name, log_file, level=logging.INFO, console=True):
     logger = logging.getLogger(name)
     logger.setLevel(level)
     logger.addHandler(handler)
+
     if console:
-	    logger.addHandler(logging.StreamHandler())
+        streamHandler = logging.StreamHandler()
+        streamHandler.setFormatter(formatter)
+        logger.addHandler(streamHandler)
 
     return logger
 

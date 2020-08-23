@@ -23,11 +23,13 @@ def updateDB():
 def main():
 
 
-    lSymb = 'forest'
-    sybms = pd.read_csv(datapath / 'lists/{}.csv'.format(lSymb))['Symbol'].values
+    lSymb = 'sp500'
+    symbs = pd.read_csv(datapath / 'lists/{}.csv'.format(lSymb))['Symbol'].values
     beginDate = '2020-08-18'
-    # sybms = ['THC']
-    for idx, symb in enumerate(tqdm(sybms)):
+
+    simulator = Simulator(symbs, '2019-01-01')
+    # symbs = ['THC']
+    for idx, symb in enumerate(tqdm(symbs)):
 
         o0 = pd.read_csv(datapath / 'historical_daily/single/{}.csv'.format(symb), 
                      dtype={'open': 'float', 'high': 'float', 'low': 'float', 'close': 'float',

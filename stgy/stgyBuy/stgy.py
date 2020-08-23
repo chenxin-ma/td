@@ -115,7 +115,7 @@ class Stgy():
             else:
                 self.pos = POSITION.PARTIAL
 
-            logger.info('%s %s %s %s %d %.3f' \
+            transLog.info('%s %s %s %s %d %.3f' \
                                     %(self.name, symb, do, date, qty, buyPrice) )
 
         elif do == 'sell':
@@ -142,10 +142,10 @@ class Stgy():
             self.balance[symb] -= qty
 
 
-            logger.info('%s %s %s %s %d %.3f' \
+            transLog.info('%s %s %s %s %d %.3f' \
                                     %(self.name, symb, do, date, qty, sellPrice) ) 
 
-            # logger.info('%s %s buy %s %d %.3f sell %s %d %.3f %.3f %d' \
+            # transLog.info('%s %s buy %s %d %.3f sell %s %d %.3f %.3f %d' \
             #     %(self.name, symb, self.buyDate[-1], qty, self.buyPrice[-1], 
             #        date, qty, sellPrice, transNet, holdDays) )
 

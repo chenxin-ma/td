@@ -29,10 +29,12 @@ class POSITION(Enum):
 class ERROR(Enum):
 	NOT_ENOUGH_HISTORY = 1
 
-loggerpath = root / "logs/transactions.log"
+loggerPath = root / "logs/logger.log"
+transLogpath = root / "logs/transactions.log"
 simLogPath = root / "logs/sim.log"
-logger = setup_logger('1', loggerpath, console=False)
-simLog = setup_logger('2', simLogPath, console=False)
+logger = setup_logger('logger', loggerPath, level=logging.INFO, console=True)
+transLog = setup_logger('transLog', transLogpath, level=logging.INFO, console=False)
+simLog = setup_logger('simLog', simLogPath, level=logging.INFO, console=False)
 
 
 MAX_INTEGER = 999999999

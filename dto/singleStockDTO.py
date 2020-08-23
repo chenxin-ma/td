@@ -1,5 +1,4 @@
 import json
-import logging
 import talib
 
 
@@ -39,7 +38,7 @@ class SingleStockDTO():
             return self.o0[priceToUse].max()
 
         if (len(self.o0) < daysBack):
-            logging.warning('Stock does not have %d days since IPO.' %daysBack)
+            logger.warning('Stock does not have %d days since IPO.' %daysBack)
             return ERROR.NOT_ENOUGH_HISTORY
 
         if end == 0:
