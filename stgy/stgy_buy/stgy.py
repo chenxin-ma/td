@@ -2,7 +2,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from config.config import *
 
-
 class Stgy():
 
     def __init__(self, sh, date_start='', priceToUse='close', init=10000):

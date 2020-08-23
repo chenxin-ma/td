@@ -1,5 +1,5 @@
-from stgy import *
-from config.config import *
+from .stgy import *
+
 
 class Stgy_CH(Stgy):
 

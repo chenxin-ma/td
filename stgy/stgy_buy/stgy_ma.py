@@ -1,4 +1,4 @@
-from stgy import *
+from .stgy import *
 
 class Stgy_MA(Stgy):
 

@@ -1,4 +1,5 @@
-from stgy import *
+from .stgy import *
+
 
 class Stgy_BAH(Stgy):
 
@@ -6,6 +7,7 @@ class Stgy_BAH(Stgy):
 
         Stgy.__init__(self, sh, priceToUse, init)
         self.name = "BAH"
+
 
     def simulation(self, begin='2000-01-01', end=''):
 

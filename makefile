@@ -1,3 +1,3 @@
 
 main:
-	python main.py -m=2
+	python main.py -m=1
