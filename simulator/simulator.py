@@ -13,4 +13,18 @@ class Simulator:
 		self.balanceBook = BalanceBook(iniValue)
 		self.actionBook = ActionBook()
 
+		self.nets = {}
 
+
+    def getAccountValue(self, date):
+
+    	value = 0
+
+    	for symb in self.balanceBook.getCurrentHolding():
+
+    		shares = self.balanceBook.getSymbShares(symb)
+    		price = self.data.getSymbClosePriceAtDate(symb, date)
+    		value += shares * price
+
+    	value += self.balanceBook.getCash()
+        return value

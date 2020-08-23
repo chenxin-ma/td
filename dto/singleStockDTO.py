@@ -4,19 +4,22 @@ import talib
 
 class SingleStockDTO():
 
-    def __init__(self, df, symb):
+    def __init__(self, df, symb, firstDay=''):
 
-        self.o0 = df
         self.symb = symb
+
+        if firstDay != '':
+            self.o0 = df[(df['datetime'] >= firstDay)].copy()
+        else:
+            self.o0 = df.copy()
+
+        self.dailyMap = self.o0.set_index('datetime').to_dict('index')
+
 
 
     def __copy__(self):
         return SingleStockDTO(self.o0.copy(), self.symb)
         
-
-    def cutFromDate(self, date_start):
-
-        self.o0 = self.o0[(self.o0['datetime'] >= date_start)].copy()
 
 
     def getSymb(self):
@@ -30,6 +33,11 @@ class SingleStockDTO():
             return self.o0
 
         return self.o0[(self.o0['datetime'] >= begin) & (self.o0['datetime'] <= end)]
+
+
+    def getCloseForDate(self, date):
+
+        return self.dailyMap[date]['close']
 
 
     def getHighestPrice(self, sinceIPO=False, daysBack=500, end=0, priceToUse='close'):
@@ -72,6 +80,7 @@ class SingleStockDTO():
         # return self.o0[priceToUse].pct_change(1).iloc[-daysBack:-end].std() 
 
         return self.o0[priceToUse].iloc[-daysBack:-end].std() / self.o0[priceToUse].iloc[-daysBack:-end].mean()
+
 
 
 

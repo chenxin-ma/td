@@ -31,9 +31,7 @@ class DataLoader:
 
             oSymb = pd.read_csv(filePath, dtype=loadFormat)
 
-            ssd = SingleStockDTO(oSymb, symb)
-            if self.firstDay != '':
-                ssd.cutFromDate(self.firstDay) 
+            ssd = SingleStockDTO(oSymb, symb, self.firstDay)
 
             lastDates.add(ssd.getDf().iloc[-1]['datetime'])
 
