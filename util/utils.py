@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime
-
+import pandas as pd
 
 formatter = logging.Formatter('[%(asctime)s] [%(levelname)s] [%(name)s] %(message)s')
 
@@ -40,3 +40,8 @@ def getDaysInterval(str1, str2):
 	a = datetime.strptime(str1, date_format)
 	b = datetime.strptime(str2, date_format)
 	return (b - a).days
+
+
+def getTodayDate():
+
+    return pd.Timestamp.now().strftime("%Y-%m-%d")

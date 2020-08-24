@@ -4,7 +4,6 @@ from shutil import copyfile
 from config.config import *
 from api import *
 from dto import *
-from stgy import *
 from simulator import *
 import pandas as pd
 import argparse
