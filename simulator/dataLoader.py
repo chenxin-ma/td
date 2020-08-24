@@ -22,6 +22,7 @@ class DataLoader:
         logger.info('DataLoader: loading daily data...')
 
         lastDates = set()
+        firstDates = set()
         for idx, symb in enumerate(tqdm(self.symbs)):
 
             filePath = dailyDataPath / '{}.csv'.format(symb)
@@ -34,13 +35,18 @@ class DataLoader:
             ssd = SingleStockDTO(oSymb, symb, self.firstDay)
 
             lastDates.add(ssd.getDf().iloc[-1]['datetime'])
+            firstDates.add(ssd.getDf().iloc[0]['datetime'])
 
             dailyData[symb] = ssd
 
-        if len(lastDates) == 1:
+        if len(lastDates) == 1 and len(firstDates) == 1:
             logger.info('DataLoader: loading %d stocks, all good.' %(len(self.symbs)))
+        elif len(lastDates) > 1 and len(firstDates) == 1:
+            logger.info('DataLoader: loading %d stocks, last dates inconsistent!' %(len(self.symbs)))
+        elif len(lastDates) == 1 and len(firstDates) > 1:
+            logger.info('DataLoader: loading %d stocks, first dates inconsistent!' %(len(self.symbs)))
         else:
-            logger.info('DataLoader: loading %d stocks, last date inconsistent!' %(len(self.symbs)))
+            logger.info('DataLoader: loading %d stocks, first and last dates inconsistent!' %(len(self.symbs)))
 
         return MultiStockDTO(dailyData, self.firstDay)
 

@@ -24,13 +24,16 @@ def main():
 
     lSymb = 'sp50'
     symbs = pd.read_csv(datapath / 'lists/{}.csv'.format(lSymb))['Symbol'].values
-    beginDate = '2018-03-01'
+    beginDate = '2018-01-01'
     # symbs = ['AAPL']
 
-    simulator = Simulator(symbs, '4MA', 'Naive', '4MA', 'Naive', 
+    ['Naive', 'Naive', 'Naive', 'Naive']
+    ['4MA', 'Naive', '4MA', 'Naive']
+    ['NewHigh', 'Naive', 'Naive', 'Naive']
+    simulator = Simulator(symbs, 'NewHigh', 'Naive', 'Naive', 'Naive', 
                             beginDate=beginDate,
                             endDate='',
-                            dataFirstDay='2018-01-01'
+                            dataFirstDay='2016-01-01'
                             )
 
     simulator.run()

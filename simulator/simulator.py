@@ -8,7 +8,7 @@ from stgy import *
 class Simulator:
 
     def __init__(self, symbs, stgyBuy, stgyBuyQuan, stgySell, stgyStop,
-                    beginDate, endDate='', dataFirstDay='', iniValue=1000000):
+                    beginDate, endDate='', dataFirstDay='', iniValue=3000000):
 
         self.symbs = symbs
         dataLoader = DataLoader(symbs, dataFirstDay)
@@ -25,20 +25,28 @@ class Simulator:
         self.simDateList = self.getSimDateList()
         self.simNumdays = len(self.simDateList)
 
-        self.calendarMap = self.geneTradingCalendar()
 
         if stgyBuy == 'Naive':
             self.stgyBuy = StgyBuyNaive(self.multiStockDTO, self.actionBook, self.balanceBook, 0)
         elif stgyBuy == '4MA':
-            self.stgyBuy = StgyBuy4MA(self.multiStockDTO, self.actionBook, self.balanceBook, self.calendarMap)
+            self.stgyBuy = StgyBuy4MA(self.multiStockDTO, self.actionBook, self.balanceBook)
+        elif stgyBuy == 'NewHigh':
+            self.stgyBuy = StgyBuyNewHigh(self.multiStockDTO, self.actionBook, self.balanceBook)
+
 
         if stgyBuyQuan == 'Naive':
-            self.stgyBuyQuan = StgyBuyQuanNaive(self.multiStockDTO, self.actionBook, self.balanceBook)
+            self.stgyBuyQuan = StgyBuyQuanNaive(self.multiStockDTO, self.actionBook, self.balanceBook, 
+                                                maxPct=1./len(symbs))
+        elif stgyBuyQuan == '4MA':
+            self.stgyBuyQuan = StgyBuyQuanNaive(self.multiStockDTO, self.actionBook, self.balanceBook, 
+                                                maxPct=0.05)
+
 
         if stgySell == 'Naive':
             self.stgySell = StgySellNaive(self.multiStockDTO, self.actionBook, self.balanceBook, self.simNumdays - 1)
         elif stgySell == '4MA':
             self.stgySell = self.stgyBuy
+
 
         if stgyStop == 'Naive':
             self.stgyStop = StgyStopNaive(self.multiStockDTO, self.actionBook, self.balanceBook)
@@ -49,16 +57,6 @@ class Simulator:
 
         return self.multiStockDTO.getSymbSingleDTO('AAPL')\
                 .getDf(self.beginDate, self.endDate)['datetime'].tolist()
-
-
-    def geneTradingCalendar(self):
-
-        calendarMap = TwoWayDict()
-        tradingDates = self.multiStockDTO.getSymbSingleDTO('AAPL').getDf()['datetime'].tolist()
-        for i, date in enumerate(tradingDates):
-            calendarMap[date] = i
-
-        return calendarMap
 
 
     def getAccountValue(self, date):

@@ -3,13 +3,11 @@ from config.config import *
 
 class StgyBuy4MA(StgyBuy):
 
-    def __init__(self, multiStockDTO, actionBook, balanceBook, calendarMap,
+    def __init__(self, multiStockDTO, actionBook, balanceBook,
     				short=5, med=10, far=20, farest=30, ema=False, priceForMA='close'):
 
         StgyBuy.__init__(self, multiStockDTO, actionBook, balanceBook)
         self.name = 'StgyBuy4MA'
-
-        self.calendarMap = calendarMap
 
         self.short = short
         self.med = med
@@ -100,17 +98,17 @@ class StgyBuy4MA(StgyBuy):
 
 
 
-    def getPrevDate(self, date, interval):
-        if self.calendarMap[date] - interval in self.calendarMap:
-            return self.calendarMap[self.calendarMap[date] - interval]
+    def tradeDateSlide(self, date, interval):
+
+        return self.multiStockDTO.getSymbSingleDTO(symb).tradeDateSlide(date, interval)
 
         return None
 
 
     def getPrevious3Days(self, symb, date):
 
-        dateP1 = self.getPrevDate(date, 1)
-        dateP2 = self.getPrevDate(date, 2)
+        dateP1 = self.tradeDateSlide(symb, date, -1)
+        dateP2 = self.tradeDateSlide(symb, date, -2)
 
         if dateP1 == None or dateP2 == None:
             return None, None, None
