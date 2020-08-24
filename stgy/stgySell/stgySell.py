@@ -1,8 +1,9 @@
 class StgySell():
 
-	def __init__(self, actionBook, balanceBook):
+	def __init__(self, multiStockDTO, actionBook, balanceBook):
 
 		self.name = 'StgySellAbstract'
+		self.multiStockDTO = multiStockDTO
 		self.actionBook = actionBook
 		self.balanceBook = balanceBook
 

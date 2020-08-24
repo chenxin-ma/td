@@ -12,7 +12,7 @@ class Simulator:
 
         self.symbs = symbs
         dataLoader = DataLoader(symbs, dataFirstDay)
-        self.data =  dataLoader.loadDailyData()
+        self.multiStockDTO =  dataLoader.loadDailyData()
 
         self.balanceBook = BalanceBook(iniValue)
         self.actionBook = ActionBook()
@@ -26,22 +26,22 @@ class Simulator:
         self.simNumdays = len(self.simDateList)
 
         if stgyBuy == 'Naive':
-            self.stgyBuy = StgyBuyNaive(self.actionBook, self.balanceBook, 0)
+            self.stgyBuy = StgyBuyNaive(self.multiStockDTO, self.actionBook, self.balanceBook, 0)
 
         if stgyBuyQuan == 'Naive':
-            self.stgyBuyQuan = StgyBuyQuanNaive(self.actionBook, self.balanceBook)
+            self.stgyBuyQuan = StgyBuyQuanNaive(self.multiStockDTO, self.actionBook, self.balanceBook)
 
         if stgySell == 'Naive':
-            self.stgySell = StgySellNaive(self.actionBook, self.balanceBook, self.simNumdays - 1)
+            self.stgySell = StgySellNaive(self.multiStockDTO, self.actionBook, self.balanceBook, self.simNumdays - 1)
 
         if stgyStop == 'Naive':
-            self.stgyStop = StgyStopNaive(self.actionBook, self.balanceBook)
+            self.stgyStop = StgyStopNaive(self.multiStockDTO, self.actionBook, self.balanceBook)
 
 
 
     def getSimDateList(self):
 
-        return self.data.getSymbSingleDTO('AAPL')\
+        return self.multiStockDTO.getSymbSingleDTO('AAPL')\
                 .getDf(self.beginDate, self.endDate)['datetime'].tolist()
 
 
@@ -53,7 +53,7 @@ class Simulator:
         for symb in self.balanceBook.getCurrentHolding():
 
             shares = self.balanceBook.getSymbShares(symb)
-            price = self.data.getSymbClosePriceAtDate(symb, date)
+            price = self.multiStockDTO.getSymbClosePriceAtDate(symb, date)
             value += shares * price
 
         value += self.balanceBook.getCash()
@@ -86,7 +86,7 @@ class Simulator:
             for symb in self.balanceBook.getCurrentHolding():
 
                 sellShares = self.stgySell.shouldSell(symb, date, dateIdx)
-                closePrice = self.data.getSymbClosePriceAtDate(symb, date)
+                closePrice = self.multiStockDTO.getSymbClosePriceAtDate(symb, date)
 
                 if sellShares > 0:
                     self.action('sell', symb, closePrice, sellShares, date)
@@ -98,11 +98,10 @@ class Simulator:
                     self.action('sell', symb, closePrice, allShares, date)
 
 
-
-            for symb in self.symbs[:2]:
+            for symb in self.symbs:
 
                 suggestBuyShares = self.stgyBuy.shouldBuy(symb, date, dateIdx)
-                closePrice = self.data.getSymbClosePriceAtDate(symb, date)
+                closePrice = self.multiStockDTO.getSymbClosePriceAtDate(symb, date)
 
                 if suggestBuyShares > 0:
 

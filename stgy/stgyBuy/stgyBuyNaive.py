@@ -2,9 +2,9 @@ from .stgyBuy import StgyBuy
 
 class StgyBuyNaive(StgyBuy):
 
-    def __init__(self, actionBook, balanceBook, firstDayIdx):
+    def __init__(self, multiStockDTO, actionBook, balanceBook, firstDayIdx):
 
-        StgyBuy.__init__(self, actionBook, balanceBook)
+        StgyBuy.__init__(self, multiStockDTO, actionBook, balanceBook)
         self.name = 'StgyBuyNaive'
         self.firstDayIdx = firstDayIdx
 
