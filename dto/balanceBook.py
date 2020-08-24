@@ -1,3 +1,5 @@
+from config.config import *
+
 class BalanceBook:
 
     def __init__(self, initValue):
@@ -37,7 +39,6 @@ class BalanceBook:
 
         if symb not in self.balance:
             self.balance[symb] = shares
-
         else:
             self.balance[symb] += shares
 
@@ -49,4 +50,4 @@ class BalanceBook:
             
         self.balance['cash'] -= shares * price
         if self.balance['cash'] < 0:
-            logger.error('BalanceBook: Margin account is not supported yet!' )
+            logger.error('BalanceBook: Margin account (%.2f) is not supported yet!' %self.getCash() )

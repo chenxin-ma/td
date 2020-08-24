@@ -115,7 +115,7 @@ class TDAPI:
         today_date = pd.Timestamp.now().strftime("%Y-%m-%d")
 
         if (len(symbList) == 0):
-            sybms = pd.read_csv(datapath / 'symbols/options.csv')['Symbol'].values
+            sybms = pd.read_csv(datapath / 'symbols/options.csv')['Symbol'].sort_values().values
         else:
             sybms = symbList
 
@@ -134,13 +134,15 @@ class TDAPI:
 
                     o0 = self.client.optionsDF(symb)
 
+                    if o0 is None:
+                        break
+
                     o0 = o0[cols]
                     o0['expirationDate'] = o0['expirationDate'].dt.date
 
                     o0.to_csv(filename, index=False, float_format='%.3f')
                     break
                 except:
-
                     time.sleep(0.1)
                     continue
 

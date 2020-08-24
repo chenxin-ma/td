@@ -12,7 +12,7 @@ class StgySellNaive(StgySell):
     def shouldSell(self, symb, date, dateIdx):
 
         if self.lastDayIdx == dateIdx:
-            return 100
+            return self.balanceBook.getSymbShares(symb)
 
         return 0
 

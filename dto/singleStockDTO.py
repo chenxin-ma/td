@@ -13,7 +13,7 @@ class SingleStockDTO():
         else:
             self.o0 = df.copy()
 
-        self.dailyMap = self.o0.set_index('datetime').to_dict('index')
+        self.refreshDailyMap()
 
 
 
@@ -35,8 +35,23 @@ class SingleStockDTO():
         return self.o0[(self.o0['datetime'] >= begin) & (self.o0['datetime'] <= end)]
 
 
-    def getCloseForDate(self, date):
+    def refreshDailyMap(self):
 
+        self.dailyMap = self.o0.set_index('datetime').to_dict('index')
+
+
+
+    def getRowDate(self, date):
+
+        if date not in self.dailyMap:
+            return None
+        return self.dailyMap[date]
+
+
+    def getCloseForDate(self, date):
+        
+        if date not in self.dailyMap:
+            return None
         return self.dailyMap[date]['close']
 
 

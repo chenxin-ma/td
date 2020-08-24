@@ -14,7 +14,7 @@ def updateDB():
 
     td = TDAPI()
     # td.pullHistPriceForAll()
-    # td.pullOptionDfForAll()
+    td.pullOptionDfForAll()
     # td.pullTodayPriceForAllBatch()
     # td.pullTodayPrice('ABCB')
 
@@ -24,12 +24,13 @@ def main():
 
     lSymb = 'sp50'
     symbs = pd.read_csv(datapath / 'lists/{}.csv'.format(lSymb))['Symbol'].values
-    beginDate = '2020-08-18'
+    beginDate = '2018-03-01'
+    # symbs = ['AAPL']
 
-    simulator = Simulator(symbs, '4MA', 'Naive', 'Naive', 'Naive', 
+    simulator = Simulator(symbs, '4MA', 'Naive', '4MA', 'Naive', 
                             beginDate=beginDate,
                             endDate='',
-                            dataFirstDay='2019-01-01'
+                            dataFirstDay='2018-01-01'
                             )
 
     simulator.run()
