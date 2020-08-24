@@ -55,23 +55,29 @@ class SingleStockDTO():
         return self.o0[priceToUse].iloc[-daysBack:-end].max()
 
 
-    def getEMA(self, period=21, priceToUse='close'):
 
-        colName = 'ema%d' %period
+    def setEMA(self, period, colName, priceToUse):
+
         if colName in self.o0.columns:
-            return self.o0[colName]
+            return False
 
         self.o0[colName] = talib.EMA(self.o0[priceToUse], timeperiod=period)
-        return self.o0[colName]
+
+        return True
 
 
-    def getSMA(self, period=21, priceToUse='close'):
+    def setSMA(self, period, colName, priceToUse):
         
-        colName = 'sma%d' %period
         if colName in self.o0.columns:
-            return self.o0[colName]
+            return False
 
         self.o0[colName] = talib.SMA(self.o0[priceToUse], timeperiod=period)
+        return True
+
+
+
+    def getCol(self, colName):
+
         return self.o0[colName]
 
 

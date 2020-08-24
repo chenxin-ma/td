@@ -26,7 +26,7 @@ def main():
     symbs = pd.read_csv(datapath / 'lists/{}.csv'.format(lSymb))['Symbol'].values
     beginDate = '2020-08-18'
 
-    simulator = Simulator(symbs, 'Naive', 'Naive', 'Naive', 'Naive', 
+    simulator = Simulator(symbs, '4MA', 'Naive', 'Naive', 'Naive', 
                             beginDate=beginDate,
                             endDate='',
                             dataFirstDay='2019-01-01'

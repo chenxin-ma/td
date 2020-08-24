@@ -27,6 +27,8 @@ class Simulator:
 
         if stgyBuy == 'Naive':
             self.stgyBuy = StgyBuyNaive(self.multiStockDTO, self.actionBook, self.balanceBook, 0)
+        elif stgyBuy == '4MA':
+            self.stgyBuy = StgyBuy4MA(self.multiStockDTO, self.actionBook, self.balanceBook)
 
         if stgyBuyQuan == 'Naive':
             self.stgyBuyQuan = StgyBuyQuanNaive(self.multiStockDTO, self.actionBook, self.balanceBook)
