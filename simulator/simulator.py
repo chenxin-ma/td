@@ -1,71 +1,74 @@
 from .dataLoader import DataLoader
 from dto.balanceBook import BalanceBook
 from dto.actionBook import ActionBook
+from config.config import *
 from util.utils import *
 from stgy import *
 
 class Simulator:
 
-	def __init__(self, symbs, stgyBuy, stgyBuyQuan, stgySell, stgyStop,
-					beginDate, endDate='', dataFirstDay='', iniValue=10000):
+    def __init__(self, symbs, stgyBuy, stgyBuyQuan, stgySell, stgyStop,
+                    beginDate, endDate='', dataFirstDay='', iniValue=100000000):
 
-		self.symbs = symbs
-		dataLoader = DataLoader(symbs, dataFirstDay)
-		self.data =  dataLoader.loadDailyData()
+        self.symbs = symbs
+        dataLoader = DataLoader(symbs, dataFirstDay)
+        self.data =  dataLoader.loadDailyData()
 
-		self.balanceBook = BalanceBook(iniValue)
-		self.actionBook = ActionBook()
-		self.netValue = {}
+        self.balanceBook = BalanceBook(iniValue)
+        self.actionBook = ActionBook()
+        self.netValue = {}
 
-		self.beginDate = beginDate
-		if endDate == '':
+        self.beginDate = beginDate
+        if endDate == '':
             self.endDate = getTodayDate()
 
         self.simDateList = self.getSimDateList()
+        self.simNumdays = len(self.simDateList)
 
         if stgyBuy == 'Naive':
-        	self.stgyBuy = StgyBuyNaive(self.beginDate)
+            self.stgyBuy = StgyBuyNaive(0)
 
         if stgyBuyQuan == 'Naive':
-        	self.stgyBuyQuan = StgyBuyQuanNaive()
+            self.stgyBuyQuan = StgyBuyQuanNaive()
 
         if stgySell == 'Naive':
-        	self.stgySell = StgyBuyQuanNaive()
+            self.stgySell = StgySellNaive(self.simNumdays - 1)
 
         if stgyStop == 'Naive':
-        	self.stgyStop = None
+            self.stgyStop = StgyStopNaive()
 
 
 
     def getSimDateList(self):
 
-    	return self.data['AAPL'].getDf(self.beginDate, self.endDate)['datetime'].tolist()
+        return self.data.getSymbSingleDTO('AAPL')\
+                .getDf(self.beginDate, self.endDate)['datetime'].tolist()
 
 
 
     def getAccountValue(self, date):
 
-    	value = 0
+        value = 0
 
-    	for symb in self.balanceBook.getCurrentHolding():
+        for symb in self.balanceBook.getCurrentHolding():
 
-    		shares = self.balanceBook.getSymbShares(symb)
-    		price = self.data.getSymbClosePriceAtDate(symb, date)
-    		value += shares * price
+            shares = self.balanceBook.getSymbShares(symb)
+            price = self.data.getSymbClosePriceAtDate(symb, date)
+            value += shares * price
 
-    	value += self.balanceBook.getCash()
+        value += self.balanceBook.getCash()
         return value
 
 
 
     def action(self, do, symb, price, shares, date):
 
-	    self.actionBook.update(do, symb, price, shares, date)
+        self.actionBook.update(do, symb, price, shares, date)
 
-    	if do == 'sell':
-	    	shares = -shares
+        if do == 'sell':
+            shares = -shares
 
-	    self.balanceBook.update(symb, shares)
+        self.balanceBook.update(symb, shares, price)
 
         transLog.info('%s %s %s %d %.3f' \
                      %(do, symb, date, abs(shares), price) )
@@ -75,35 +78,32 @@ class Simulator:
     def run(self):
 
 
-    	for dateId, date in enumerate(tqdm(self.simDateList)):
+        for dateIdx, date in enumerate(tqdm(self.simDateList)):
 
-    		logger.debug('Simulator: date %s undergoing.' %date)
+            logger.debug('Simulator: date %s undergoing.' %date)
 
-    		for symb in self.symbs:
+            for symb in self.symbs:
 
-    			suggestBuyShares = self.stgyBuy.shouldBuy(symb, date)
-				closePrice = self.data.getSymbClosePriceAtDate(symb, date)
+                suggestBuyShares = self.stgyBuy.shouldBuy(symb, date, dateIdx)
+                closePrice = self.data.getSymbClosePriceAtDate(symb, date)
 
-    			if suggestBuyShares > 0:
+                if suggestBuyShares > 0:
 
-    				shares = self.stgyBuyQuan.sharesToBuy(suggestBuyShares)
-    				action('buy', symb, closePrice, shares, date)
+                    shares = self.stgyBuyQuan.sharesToBuy(suggestBuyShares)
+                    self.action('buy', symb, closePrice, shares, date)
 
 
-    			sellShares = self.stgySell.shouldSell(self.balanceBook, 
-    												  self.actionBook, 
-    												  symb, 
-    												  date)
+                sellShares = self.stgySell.shouldSell(symb, date, dateIdx)
 
-    			if sellShares > 0:
-    				action('sell', symb, closePrice, sellShares, date)
+                if sellShares > 0:
+                    self.action('sell', symb, closePrice, sellShares, date)
 
-    			shoudStop = self.stgyStop.shoudStop(symb, date)
+                shoudStop = self.stgyStop.shouldStop(symb, date)
 
-    			if shoudStop:
-    				allShares = self.balanceBook.getSymbShares(symb)
-    				action('sell', symb, closePrice, allShares, date)
-    				
+                if shoudStop:
+                    allShares = self.balanceBook.getSymbShares(symb)
+                    self.action('sell', symb, closePrice, allShares, date)
+
 
 
 

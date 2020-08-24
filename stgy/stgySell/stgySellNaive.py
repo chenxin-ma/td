@@ -1,17 +1,19 @@
+from .stgySell import StgySell
+
 class StgySellNaive(StgySell):
 
-	def __init__(self, lastDay):
+    def __init__(self, lastDayIdx):
 
         StgySell.__init__(self)
-		self.name = 'StgySellNaive'
-		self.lastDay = lastDay
+        self.name = 'StgySellNaive'
+        self.lastDayIdx = lastDayIdx
 
 
-	def shouldSell(self, symb, date):
+    def shouldSell(self, symb, date, dateIdx):
 
-		if self.lastDay == date:
-			return 100
+        if self.lastDayIdx == dateIdx:
+            return 100
 
-		return 0
+        return 0
 
 

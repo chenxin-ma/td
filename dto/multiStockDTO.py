@@ -9,7 +9,12 @@ class MultiStockDTO():
 		else:
 			self.date_start = date_start
 
-			
+	
+
+	def getSymbSingleDTO(self, symb):
+
+		return self.data[symb]
+
 
 	def getSymbClosePriceAtDate(self, symb, date):
 

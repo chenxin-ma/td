@@ -1,17 +1,19 @@
+from .stgyBuy import StgyBuy
+
 class StgyBuyNaive(StgyBuy):
 
-	def __init__(self, firstDay):
+    def __init__(self, firstDayIdx):
 
         StgyBuy.__init__(self)
-		self.name = 'StgyBuyNaive'
-		self.firstDay = firstDay
+        self.name = 'StgyBuyNaive'
+        self.firstDayIdx = firstDayIdx
 
 
-	def shouldBuy(self, symb, date):
+    def shouldBuy(self, symb, date, dateIdx):
 
-		if self.firstDay == date:
-			return 100
+        if self.firstDayIdx == dateIdx:
+            return 100
 
-		return 0
+        return 0
 
 

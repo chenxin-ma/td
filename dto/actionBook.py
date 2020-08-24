@@ -17,8 +17,8 @@ class ActionBook:
 
     def update(self, do, symb, price, shares, date):
 
-    	if symb not in self.actions:
-    		self.actions[symb] = []
+        if symb not in self.actions:
+            self.actions[symb] = []
 
         self.actions[symb].append({'type': do, 'date': date, 
                              'price': price, 'shares': shares})

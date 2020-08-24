@@ -22,11 +22,19 @@ def updateDB():
 def main():
 
 
-    lSymb = 'sp500'
+    lSymb = 'sp50'
     symbs = pd.read_csv(datapath / 'lists/{}.csv'.format(lSymb))['Symbol'].values
     beginDate = '2020-08-18'
 
-    simulator = Simulator(symbs, '2019-01-01')
+    simulator = Simulator(symbs, 'Naive', 'Naive', 'Naive', 'Naive', 
+                            beginDate=beginDate,
+                            endDate='',
+                            dataFirstDay='2019-01-01'
+                            )
+
+    simulator.run()
+    return 
+
     # symbs = ['THC']
     for idx, symb in enumerate(tqdm(symbs)):
 
