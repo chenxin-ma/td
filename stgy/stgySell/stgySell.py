@@ -1,8 +1,10 @@
 class StgySell():
 
-	def __init__(self):
+	def __init__(self, actionBook, balanceBook):
 
 		self.name = 'StgySellAbstract'
+		self.actionBook = actionBook
+		self.balanceBook = balanceBook
 
 
 	def getName(self):

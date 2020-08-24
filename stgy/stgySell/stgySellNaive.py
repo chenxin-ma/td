@@ -2,9 +2,9 @@ from .stgySell import StgySell
 
 class StgySellNaive(StgySell):
 
-    def __init__(self, lastDayIdx):
+    def __init__(self, actionBook, balanceBook, lastDayIdx):
 
-        StgySell.__init__(self)
+        StgySell.__init__(self, actionBook, balanceBook)
         self.name = 'StgySellNaive'
         self.lastDayIdx = lastDayIdx
 
