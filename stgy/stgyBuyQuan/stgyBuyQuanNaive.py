@@ -6,7 +6,7 @@ class StgyBuyQuanNaive(StgyBuyQuan):
 		self.name = 'StgyBuyQuanNaive'
 
 
-	def sharesToBuy(self, suggestBuyShares,):
+	def sharesToBuy(self, suggestBuyShares):
 
-		return 100
+		return suggestBuyShares
 

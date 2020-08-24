@@ -9,6 +9,9 @@ class StgyBuyNaive(StgyBuy):
 
 	def shouldBuy(self, symb, date):
 
-		return self.firstDay == date
+		if self.firstDay == date:
+			return 100
+
+		return 0
 
 

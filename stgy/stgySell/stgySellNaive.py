@@ -2,6 +2,7 @@ class StgySellNaive(StgySell):
 
 	def __init__(self, lastDay):
 
+        StgySell.__init__(self)
 		self.name = 'StgySellNaive'
 		self.lastDay = lastDay
 

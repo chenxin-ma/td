@@ -27,7 +27,13 @@ class Simulator:
         	self.stgyBuy = StgyBuyNaive(self.beginDate)
 
         if stgyBuyQuan == 'Naive':
-        	self.buyQuanSgy = StgyBuyQuanNaive()
+        	self.stgyBuyQuan = StgyBuyQuanNaive()
+
+        if stgySell == 'Naive':
+        	self.stgySell = StgyBuyQuanNaive()
+
+        if stgyStop == 'Naive':
+        	self.stgyStop = None
 
 
 
@@ -76,19 +82,28 @@ class Simulator:
     		for symb in self.symbs:
 
     			suggestBuyShares = self.stgyBuy.shouldBuy(symb, date)
+				closePrice = self.data.getSymbClosePriceAtDate(symb, date)
+
     			if suggestBuyShares > 0:
 
-    				shares = self.buyQuanSgy.sharesToBuy(suggestBuyShares)
-    				price = self.data.getSymbClosePriceAtDate(symb, date)
-    				action('buy', symb, price, shares, date)
+    				shares = self.stgyBuyQuan.sharesToBuy(suggestBuyShares)
+    				action('buy', symb, closePrice, shares, date)
 
 
-    			sellQuan = self.stgySell.shouldSell(self.balanceBook, 
+    			sellShares = self.stgySell.shouldSell(self.balanceBook, 
     												  self.actionBook, 
     												  symb, 
     												  date)
 
-    			if shouldSell > 0:
+    			if sellShares > 0:
+    				action('sell', symb, closePrice, sellShares, date)
+
+    			shoudStop = self.stgyStop.shoudStop(symb, date)
+
+    			if shoudStop:
+    				allShares = self.balanceBook.getSymbShares(symb)
+    				action('sell', symb, closePrice, allShares, date)
+    				
 
 
 
