@@ -129,7 +129,7 @@ class StgyBuy4MA(StgyBuy):
             return 0
 
         day0, dayP1, dayP2 = self.getPrevious3Days(symb, date)
-        if day0 == None:
+        if day0 == None or dayP2 == None:
             return 0
 
         if self.duoPai(day0) and not self.duoPai(dayP1):
@@ -146,7 +146,7 @@ class StgyBuy4MA(StgyBuy):
     def shouldSell(self, symb, date, dateIdx):
 
         day0, dayP1, dayP2 = self.getPrevious3Days(symb, date)
-        if day0 == None:
+        if day0 == None or dayP2 == None:
             return 0
 
         if self.kongPai(day0):
