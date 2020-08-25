@@ -4,6 +4,7 @@ from dto.actionBook import ActionBook
 from config.config import *
 from util.utils import *
 from stgy import *
+from .referee import Referee
 
 class Simulator:
 
@@ -25,6 +26,8 @@ class Simulator:
         self.simDateList = self.getSimDateList()
         self.simNumdays = len(self.simDateList)
 
+        self.referee = Referee(self.multiStockDTO, self.actionBook, self.balanceBook, self.netValue)
+
 
         if stgyBuy == 'Naive':
             self.stgyBuy = StgyBuyNaive(self.multiStockDTO, self.actionBook, self.balanceBook, 0)
@@ -42,6 +45,9 @@ class Simulator:
         elif stgyBuyQuan == '4MA':
             self.stgyBuyQuan = StgyBuyQuanNaive(self.multiStockDTO, self.actionBook, self.balanceBook, 
                                                 maxPct=0.05)        
+        elif stgyBuyQuan == 'NewHigh':
+            self.stgyBuyQuan = StgyBuyQuanNaive(self.multiStockDTO, self.actionBook, self.balanceBook, 
+                                                maxPct=0.02)        
         elif stgyBuyQuan == 'NewHigh':
             self.stgyBuyQuan = StgyBuyQuanNaive(self.multiStockDTO, self.actionBook, self.balanceBook, 
                                                 maxPct=0.02)
@@ -64,6 +70,7 @@ class Simulator:
 
         return self.multiStockDTO.getSymbSingleDTO('AAPL')\
                 .getDf(self.beginDate, self.endDate)['datetime'].tolist()
+
 
 
     def getAccountValue(self, date):
@@ -97,6 +104,16 @@ class Simulator:
 
         transLog.info('%s %s %s %d %.3f' \
                      %(do, symb, date, abs(shares), price) )
+
+
+
+    def judger(self):
+
+        winR = self.referee.winRatio()
+        yearlyR = self.referee.yearlyReturn()
+
+        simLog.info('Simulation finished: yearly return %.3f%%, win rate %.3f' %(yearlyR, winR) )
+        logger.info('Simulation finished: yearly return %.3f%%, win rate %.3f.' %(yearlyR, winR) )
 
 
 
@@ -146,11 +163,7 @@ class Simulator:
             cashNow = self.balanceBook.getCash()
             simLog.info('Date %s, net %.2f, holding %d, cash %.2f' %(date, todayNet, numStock, cashNow))
 
-
-
-
-
-
+        self.judger()
 
 
 
