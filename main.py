@@ -22,18 +22,19 @@ def updateDB():
 def main():
 
 
-    lSymb = 'sp50'
+    lSymb = 'sp500'
     symbs = pd.read_csv(datapath / 'lists/{}.csv'.format(lSymb))['Symbol'].values
     beginDate = '2018-01-01'
     # symbs = ['AAPL']
 
     ['Naive', 'Naive', 'Naive', 'Naive']
     ['4MA', 'Naive', '4MA', 'Naive']
-    ['NewHigh', 'Naive', 'MultiPct', 'Naive']
-    simulator = Simulator(symbs, 'NewHigh', 'Naive', 'MultiPct', 'Naive', 
+    ['NewHigh', 'NewHigh', 'MultiPct', 'Naive']
+    ['CupHandle', 'NewHigh', 'MultiPct', 'Naive']
+    simulator = Simulator(symbs, 'CupHandle', 'NewHigh', 'MultiPct', 'Naive', 
                             beginDate=beginDate,
                             endDate='',
-                            dataFirstDay='2016-01-01'
+                            dataFirstDay='2017-01-01'
                             )
 
     simulator.run()

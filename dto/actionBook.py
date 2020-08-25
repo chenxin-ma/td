@@ -24,13 +24,13 @@ class ActionBook:
                              'price': price, 'shares': shares})
 
 
-    def getLastBuyPrice(self, symb):
+    def getLastBuyAction(self, symb):
 
         actionList = self.actions[symb]
 
         for i in range(len(actionList)):
             if actionList[-i - 1]['type'] == 'buy':
-                return actionList[-i - 1]['price']
+                return actionList[-i - 1]
 
         return None
 

@@ -2,7 +2,7 @@ from .stgyStop import StgyStop
 
 class StgyStopNaive(StgyStop):
 
-    def __init__(self, multiStockDTO, actionBook, balanceBook, stopR=0.05):
+    def __init__(self, multiStockDTO, actionBook, balanceBook, stopR=0.06):
 
         StgyStop.__init__(self, multiStockDTO, actionBook, balanceBook)
         self.name = 'StgyStopNaive'
@@ -17,7 +17,7 @@ class StgyStopNaive(StgyStop):
         singleDTO = self.multiStockDTO.getSymbSingleDTO(symb)
         lowPrice = singleDTO.getRowDate(date)['low']
 
-        lastBuyPrice = self.actionBook.getLastBuyPrice(symb)
+        lastBuyPrice = self.actionBook.getLastBuyAction(symb)['price']
 
         if lowPrice < lastBuyPrice * (1 - self.stopR):
             return True, lowPrice

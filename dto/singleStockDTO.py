@@ -36,6 +36,13 @@ class SingleStockDTO():
         if begin == '' and end == '':
             return self.o0
 
+        if begin == '' and end != '':
+            return self.o0[self.o0['datetime'] <= end]
+            
+        if begin != '' and end == '':
+            return self.o0[self.o0['datetime'] >= begin]
+
+
         return self.o0[(self.o0['datetime'] >= begin) & (self.o0['datetime'] <= end)]
 
 

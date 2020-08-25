@@ -32,6 +32,8 @@ class Simulator:
             self.stgyBuy = StgyBuy4MA(self.multiStockDTO, self.actionBook, self.balanceBook)
         elif stgyBuy == 'NewHigh':
             self.stgyBuy = StgyBuyNewHigh(self.multiStockDTO, self.actionBook, self.balanceBook)
+        elif stgyBuy == 'CupHandle':
+            self.stgyBuy = StgyBuyCupHandle(self.multiStockDTO, self.actionBook, self.balanceBook)
 
 
         if stgyBuyQuan == 'Naive':
@@ -39,7 +41,10 @@ class Simulator:
                                                 maxPct=1./len(symbs))
         elif stgyBuyQuan == '4MA':
             self.stgyBuyQuan = StgyBuyQuanNaive(self.multiStockDTO, self.actionBook, self.balanceBook, 
-                                                maxPct=0.05)
+                                                maxPct=0.05)        
+        elif stgyBuyQuan == 'NewHigh':
+            self.stgyBuyQuan = StgyBuyQuanNaive(self.multiStockDTO, self.actionBook, self.balanceBook, 
+                                                maxPct=0.02)
 
 
         if stgySell == 'Naive':
