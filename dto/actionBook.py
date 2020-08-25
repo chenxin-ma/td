@@ -22,3 +22,18 @@ class ActionBook:
 
         self.actions[symb].append({'type': do, 'date': date, 
                              'price': price, 'shares': shares})
+
+
+    def getLastBuyPrice(self, symb):
+
+        actionList = self.actions[symb]
+
+        for i in range(len(actionList)):
+            if actionList[-i - 1]['type'] == 'buy':
+                return actionList[-i - 1]['price']
+
+        return None
+
+
+    def isAfterBuy(self, symb):
+        return len(self.actions[symb]) > 0 and self.actions[symb][-1]['type'] == 'buy'

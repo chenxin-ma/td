@@ -17,8 +17,8 @@ class BalanceBook:
     def getSymbShares(self, symb):
 
         if symb not in self.balance:
-            logger.error('BalanceBook: symb %s not exsits!')
-            return None
+            # logger.warning('BalanceBook: symb %s not exsits!')
+            return 0
 
         return self.balance[symb]
 

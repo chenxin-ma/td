@@ -29,8 +29,8 @@ def main():
 
     ['Naive', 'Naive', 'Naive', 'Naive']
     ['4MA', 'Naive', '4MA', 'Naive']
-    ['NewHigh', 'Naive', 'Naive', 'Naive']
-    simulator = Simulator(symbs, 'NewHigh', 'Naive', 'Naive', 'Naive', 
+    ['NewHigh', 'Naive', 'MultiPct', 'Naive']
+    simulator = Simulator(symbs, 'NewHigh', 'Naive', 'MultiPct', 'Naive', 
                             beginDate=beginDate,
                             endDate='',
                             dataFirstDay='2016-01-01'

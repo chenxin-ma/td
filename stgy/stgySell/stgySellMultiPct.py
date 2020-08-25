@@ -16,9 +16,17 @@ class StgySellMultiPct(StgySell):
 
     def shouldSell(self, symb, date, dateIdx):
 
+        if self.actionBook.isAfterBuy(symb):
+            self.jianCangIdx = 0
+
+
         jianCangPct = 0
-        datePrice = singleDTO.getRowDate(date)[self.priceToUse]
-		lastBuyPrice = ''
+        singleDTO = self.multiStockDTO.getSymbSingleDTO(symb)
+        datePrice = singleDTO.getRowDate(date)['close']
+
+        lastBuyPrice = self.actionBook.getLastBuyPrice(symb)
+        if lastBuyPrice is None:
+            logger.error('StgySellMultiPct: Cannot find last buy %s.' %symb)
 
         while self.jianCangIdx < self.maxTimes:
             if datePrice >= lastBuyPrice * self.jianCangProfitThres[self.jianCangIdx]:
@@ -28,7 +36,7 @@ class StgySellMultiPct(StgySell):
                 break
 
         if self.jianCangIdx > 0 and self.jianCangIdx < self.maxTimes:
-            if day[self.priceToUse] / self.lastBuyPrice < self.jianCangZhiYingThres[self.jianCangIdx - 1]:
+            if datePrice / lastBuyPrice < self.jianCangZhiYingThres[self.jianCangIdx - 1]:
                 return self.balanceBook.getSymbShares(symb)
 
         return int(round(self.balanceBook.getSymbShares(symb) * jianCangPct))

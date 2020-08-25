@@ -46,6 +46,8 @@ class Simulator:
             self.stgySell = StgySellNaive(self.multiStockDTO, self.actionBook, self.balanceBook, self.simNumdays - 1)
         elif stgySell == '4MA':
             self.stgySell = self.stgyBuy
+        elif stgySell == 'MultiPct':
+            self.stgySell = StgySellMultiPct(self.multiStockDTO, self.actionBook, self.balanceBook)
 
 
         if stgyStop == 'Naive':
@@ -109,11 +111,11 @@ class Simulator:
                 if sellShares > 0:
                     self.action('sell', symb, closePrice, sellShares, date)
 
-                shoudStop = self.stgyStop.shouldStop(symb, date)
+                shoudStop, stopPrie = self.stgyStop.shouldStop(symb, date)
 
                 if shoudStop:
                     allShares = self.balanceBook.getSymbShares(symb)
-                    self.action('sell', symb, closePrice, allShares, date)
+                    self.action('sell', symb, stopPrie, allShares, date)
 
 
             todayNet = self.getAccountValue(date)
