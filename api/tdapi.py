@@ -45,6 +45,7 @@ class TDAPI:
 
         symbAll = [f[:-4] for f in listdir(datapath / 'historical_daily/single/') 
                  if isfile(join(datapath / 'historical_daily/single', f)) and f.endswith('.csv')]
+        symbAll = sorted(symbAll)
 
         today_date = pd.Timestamp.now().strftime("%Y-%m-%d")
         bs = 100
@@ -83,7 +84,6 @@ class TDAPI:
 
     def pullTodayPrice(self, symb):
 
-
         today_date = pd.Timestamp.now().strftime("%Y-%m-%d")
 
 
@@ -110,7 +110,7 @@ class TDAPI:
 
     def pullOptionDfForAll(self, symbList=[]):
         
-        cols = ['putCall','description','bid','ask',
+        cols = ['putCall','description','bid','ask','mark','delta','gamma','theta','vega','rho',
             'totalVolume','openInterest','strikePrice','expirationDate']
         today_date = pd.Timestamp.now().strftime("%Y-%m-%d")
 
@@ -147,4 +147,24 @@ class TDAPI:
                     continue
 
 
+    def pullFundamentalForAll(self):
 
+        sybms = pd.read_csv(datapath / 'symbols/all.csv')['Symbol'].values
+
+        bs = 50
+        dic_fund = {}
+        for i in tqdm(range(len(sybms) // bs + 1)):
+            
+            strs = ','.join(sybms[i * bs : (i + 1) * bs])
+            while 1:
+                try:
+                    res = c.fundamental(strs)
+                    break
+                except:
+                    continue
+                
+            dic_fund = {**dic_fund , **res}
+
+        with open(datapath / 'fundamental/all.json', 'w') as fp:
+            json.dump(dic_fund, fp, sort_keys=True, indent=4)
+        
