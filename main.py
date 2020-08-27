@@ -30,7 +30,7 @@ def main():
     ['Naive', 'Naive', 'Naive', 'Naive']
     ['4MA', 'Naive', '4MA', 'Naive']
     ['NewHigh', 'NewHigh', 'MultiPct', 'Naive']
-    ['CupHandle', 'NewHigh', 'MultiPct', 'Naive']
+    ['CupHandle', 'CupHandle', 'MultiPct', 'Naive']
     simulator = Simulator(symbs, 'CupHandle', 'NewHigh', 'MultiPct', 'Naive', 
                             beginDate=beginDate,
                             endDate='',
