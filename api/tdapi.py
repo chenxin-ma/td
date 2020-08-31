@@ -82,29 +82,34 @@ class TDAPI:
 
 
 
-    def pullTodayPrice(self, symb):
+    def pullTodayPrice(self, symbList=[]):
 
         today_date = pd.Timestamp.now().strftime("%Y-%m-%d")
 
+        if (len(symbList) == 0):
+            sybms = pd.read_csv(datapath / 'symbols/options.csv')['Symbol'].sort_values().values
+        else:
+            sybms = symbList
+        for i in tqdm(range(len(sybms))):
 
-        oBatch = self.client.quoteDF(symb)
-        oBatch['datetime'] = today_date
+            oBatch = self.client.quoteDF(symb)
+            oBatch['datetime'] = today_date
 
-        oBatch_ = oBatch[['symbol','openPrice','highPrice','lowPrice','regularMarketLastPrice',
-                                'totalVolume','datetime']].copy()
-        oBatch_ = oBatch_.round(3)
+            oBatch_ = oBatch[['symbol','openPrice','highPrice','lowPrice','regularMarketLastPrice',
+                                    'totalVolume','datetime']].copy()
+            oBatch_ = oBatch_.round(3)
 
-        oSymb = pd.read_csv(datapath / 'historical_daily/single/{}.csv'.format(symb))
+            oSymb = pd.read_csv(datapath / 'historical_daily/single/{}.csv'.format(symb))
 
-        if oSymb.iloc[-1]['datetime'] == today_date:
-            oSymb = oSymb.iloc[:-1].copy()
+            if oSymb.iloc[-1]['datetime'] == today_date:
+                oSymb = oSymb.iloc[:-1].copy()
 
-        rowToday = oBatch_.iloc[0][['openPrice','highPrice','lowPrice','regularMarketLastPrice',
-                            'totalVolume','datetime']].values
+            rowToday = oBatch_.iloc[0][['openPrice','highPrice','lowPrice','regularMarketLastPrice',
+                                'totalVolume','datetime']].values
 
-        oSymb.loc[len(oSymb)] = rowToday
-        oSymb.to_csv(datapath / 'historical_daily/single/{}.csv'.format(symb), 
-                                index=False, float_format='%.3f')
+            oSymb.loc[len(oSymb)] = rowToday
+            oSymb.to_csv(datapath / 'historical_daily/single/{}.csv'.format(symb), 
+                                    index=False, float_format='%.3f')
 
 
 

@@ -16,7 +16,7 @@ def updateDB():
     # td.pullHistPriceForAll()
     td.pullOptionDfForAll()
     # td.pullTodayPriceForAllBatch()
-    # td.pullTodayPrice('BIGC')
+    # td.pullTodayPrice()
 
 
 def main():
