@@ -4,7 +4,7 @@ import pandas as pd
 from os import listdir
 from os.path import isfile, join
 import logging
-
+import json
 
 class TDAPI:
 
@@ -92,6 +92,7 @@ class TDAPI:
             sybms = symbList
         for i in tqdm(range(len(sybms))):
 
+            symb = sybms[i]
             oBatch = self.client.quoteDF(symb)
             oBatch['datetime'] = today_date
 
@@ -151,16 +152,19 @@ class TDAPI:
                     time.sleep(0.1)
                     continue
 
-        loggerPath.info('TDapi: Begin to merge today\'s option data')
-        self.mergeOptionDfForOneDay(today_date)
-        loggerPath.info('TDapi: Begin to merge option data for all dates')
-        self.mergeOptionAllDays()
-        loggerPath.info('TDapi: Begin to detect anomaly option trades.')
-        self.anomalyOptionTradeDetector(today_date)
+        logger.info('TDapi: Begin to merge today\'s option data')
+        # self.mergeOptionDfForOneDay(today_date)
+        logger.info('TDapi: Begin to merge option data for all dates')
+        oAll = self.mergeOptionAllDays()
+        logger.info('TDapi: Begin to detect anomaly option trades.')
+        self.anomalyOptionTradeDetector(today_date, oAll)
 
 
 
     def mergeOptionDfForOneDay(self, date):
+
+        with open(datapath / 'fundamental/all.json', 'r') as fp:
+            dic_fund = json.load(fp)
 
         longTermThres = (pd.Timestamp(date) + pd.DateOffset(months=1)).strftime("%Y-%m-%d")
 
@@ -182,6 +186,11 @@ class TDAPI:
             vsR = ttlV * 100 / tts if tts != 0 else 0
             osR = ttlO * 100 / tts if tts != 0 else 0
             o0Long = o0[o0['expirationDate'] >= longTermThres]
+           
+            oSingle = pd.read_csv(datapath / 'historical_daily/single/{}.csv'.format(symb))
+            dayChange = (oSingle.iloc[-1]['close'] / oSingle.iloc[-2]['close'] - 1) * 100
+            volIncrease = oSingle.iloc[-1]['volume'] / oSingle.iloc[-11:-1]['volume'].mean()
+
             if len(o0Long) > 0:
                 d4Long = o0Long.groupby('putCall')[['totalVolume','openInterest']].sum().unstack().values
                 longCallVol = d4Long[0]
@@ -193,7 +202,7 @@ class TDAPI:
                 
             line = [symb, date, d4[0], longCallVol, d4[1], longPutVol, pcVR, ttlV, 
                     d4[2], longCallOpen, d4[3], longPutOpen, pcOR, ttlO, 
-                    voR, vsR, osR]
+                    voR, vsR, osR, dayChange, volIncrease]
             oS.loc[len(oS)] = line
 
         oS[['pcVolR','pcOpenR','vol/Open','vol/Share','open/Share']]\
@@ -212,12 +221,39 @@ class TDAPI:
             oDaily[date] = pd.read_csv(datapath / 'historical_option_daily/merge/{}.csv'.format(date))
         oAll = pd.concat([oDaily[date] for date in oDaily])
 
+        # oAll = self.getDailyReturn(oAll)
+
         oAll.sort_values(['symb','date']).to_csv(datapath / 'historical_option_daily/all.csv', 
                                             index=False, float_format='%.3f')
+        return oAll
 
 
 
-    def anomalyOptionTradeDetector(self, todayDate):
+    # def getDailyReturn(self, oAll):
+
+    #     dfList = {}
+    #     for symb, oGroup in tqdm(oAll.groupby('symb')):
+    #         oGroup = oGroup.sort_values('date')
+    #         try:
+    #             oSingle = pd.read_csv(datapath / 'historical_daily/single/{}.csv'.format(symb))
+    #         except:
+    #             continue
+
+    #         oSingle['change_pct'] = (oSingle['close'] / oSingle['close'].shift(1) - 1) * 100
+    #         oSingle['volume_ma20'] = oSingle['volume'].rolling(window=10).mean()
+    #         oSingle['vol_multi'] = oSingle['volume'] / oSingle['volume_ma20']
+
+    #         oGroup = oGroup.merge(oSingle[['change_pct', 'vol_multi','datetime']], how='left', 
+    #                                             left_on='date', right_on='datetime')
+    #         dfList[symb] = oGroup
+
+    #     oAll = pd.concat([dfList[symb] for symb in dfList])
+
+    #     return oAll
+
+
+
+    def anomalyOptionTradeDetector(self, date, oAll):
 
         colCheck = ['longCVol','longPVol','longCOpen','longPOpen']
         watch = set()
@@ -233,12 +269,11 @@ class TDAPI:
                 if col.endswith('Vol') and todayRow[col] > prevRows[col].mean() * 3 and todayRow[col] > 1000 \
                 or col.endswith('Open') and todayRow[col] > prevRows[col].mean() * 1.5 and todayRow[col] > 10000:
                     
-                    oSingle = pd.read_csv(datapath / 'historical_daily/single/{}.csv'.format(symb))
-                    dayChange = (oSingle.iloc[-1]['close'] / oSingle.iloc[-2]['close'] - 1) * 100
-                    volIncrease = oSingle.iloc[-1]['volume'] / oSingle.iloc[-21:-1]['volume'].mean()
-                    oOption = pd.read_csv(datapath / 'historical_option_daily/single/{}/{}.csv'.format(todayDate, symb))
+                    dayChange = oSymb['change_pct']
+                    volIncrease = oSymb['vol_multi']
+                    oOption = pd.read_csv(datapath / 'historical_option_daily/single/{}/{}.csv'.format(date, symb))
                 
-                    longTermThres = (pd.Timestamp(todayDate) + pd.DateOffset(months=1)).strftime("%Y-%m-%d")
+                    longTermThres = (pd.Timestamp(date) + pd.DateOffset(months=1)).strftime("%Y-%m-%d")
                     o0Long = oOption[oOption['expirationDate'] >= longTermThres]
                     o0LongC = o0Long[o0Long['putCall'] == 'CALL']
                     o0LongP = o0Long[o0Long['putCall'] == 'PUT']
@@ -252,12 +287,12 @@ class TDAPI:
                     else:
                         theOne = ''
         #             if abs(dayChange) < 3:
-                    row = [todayDate, symb, col, todayRow[col], '{0:.2f}'.format(prevRows[col].mean()), 
+                    row = [date, symb, col, todayRow[col], '{0:.2f}'.format(prevRows[col].mean()), 
                            '{0:.2f}'.format(dayChange), '{0:.2f}'.format(volIncrease), theOne]
                     print(row[1:])
                     oWatch.loc[len(oWatch)] = row
 
-        oWatch.to_csv(datapath / 'historical_option_daily/watch/{}.csv'.format(todayDate),index=False )
+        oWatch.to_csv(datapath / 'historical_option_daily/watch/{}.csv'.format(date),index=False )
                         
 
 
