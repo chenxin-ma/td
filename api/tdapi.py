@@ -189,8 +189,8 @@ class TDAPI:
             o0Long = o0[o0['expirationDate'] >= longTermThres]
             
             if symb not in dic_fund:
-                vsR = ''
-                osR = ''
+                vsR = -1
+                osR = -1
             else:
 
                 tts = dic_fund[symb]['fundamental']['sharesOutstanding']
