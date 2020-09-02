@@ -153,7 +153,7 @@ class TDAPI:
                     continue
 
         logger.info('TDapi: Begin to merge today\'s option data')
-        # self.mergeOptionDfForOneDay(today_date)
+        self.mergeOptionDfForOneDay(today_date)
         logger.info('TDapi: Begin to merge option data for all dates')
         oAll = self.mergeOptionAllDays()
         logger.info('TDapi: Begin to detect anomaly option trades.')
@@ -171,25 +171,39 @@ class TDAPI:
         optSymb = [f[:-4] for f in listdir(datapath / 'historical_option_daily/single/{}/'.format(date)) 
                          if isfile(join(datapath / 'historical_option_daily/single/{}/'.format(date), f)) and f.endswith('.csv')]
 
-        cols = ['symb','date','callVol','longCVol','putVol','longPVol','pcVolR','ttlVol','callOpen','longCOpen','putOpen','longPOpen','pcOpenR','ttlOpen','vol/Open','vol/Share','open/Share']
+        cols = ['symb','date','callVol','longCVol','putVol','longPVol','pcVolR','ttlVol',
+                              'callOpen','longCOpen','putOpen','longPOpen','pcOpenR','ttlOpen',
+                              'vol/Open','vol/Share','open/Share','change_pct','vol_multi']
 
         oS = pd.DataFrame(columns=cols)
         for symb in tqdm(optSymb):
             o0 = pd.read_csv(datapath / 'historical_option_daily/single/{}/{}.csv'.format(date,symb) )
             d4 = o0.groupby('putCall')[['totalVolume','openInterest']].sum().unstack().values
-            tts = dic_fund[symb]['fundamental']['sharesOutstanding']
+
+
             ttlV = d4[0] + d4[1]
             ttlO = d4[2] + d4[3]
             pcVR = d4[1] / d4[0] if d4[0] != 0 else None
             pcOR = d4[3] / d4[2] if d4[2] != 0 else None
             voR = ttlV / ttlO if ttlO != 0 else 0
-            vsR = ttlV * 100 / tts if tts != 0 else 0
-            osR = ttlO * 100 / tts if tts != 0 else 0
             o0Long = o0[o0['expirationDate'] >= longTermThres]
-           
-            oSingle = pd.read_csv(datapath / 'historical_daily/single/{}.csv'.format(symb))
-            dayChange = (oSingle.iloc[-1]['close'] / oSingle.iloc[-2]['close'] - 1) * 100
-            volIncrease = oSingle.iloc[-1]['volume'] / oSingle.iloc[-11:-1]['volume'].mean()
+            
+            if symb not in dic_fund:
+                vsR = ''
+                osR = ''
+            else:
+
+                tts = dic_fund[symb]['fundamental']['sharesOutstanding']
+                vsR = ttlV * 100 / tts if tts != 0 else 0
+                osR = ttlO * 100 / tts if tts != 0 else 0
+
+            try:
+                oSingle = pd.read_csv(datapath / 'historical_daily/single/{}.csv'.format(symb))
+                dayChange = (oSingle.iloc[-1]['close'] / oSingle.iloc[-2]['close'] - 1) * 100
+                volIncrease = oSingle.iloc[-1]['volume'] / oSingle.iloc[-11:-1]['volume'].mean()
+            except:
+                dayChange = ''
+                volIncrease = '' 
 
             if len(o0Long) > 0:
                 d4Long = o0Long.groupby('putCall')[['totalVolume','openInterest']].sum().unstack().values
@@ -226,7 +240,6 @@ class TDAPI:
         oAll.sort_values(['symb','date']).to_csv(datapath / 'historical_option_daily/all.csv', 
                                             index=False, float_format='%.3f')
         return oAll
-
 
 
     # def getDailyReturn(self, oAll):
@@ -269,8 +282,8 @@ class TDAPI:
                 if col.endswith('Vol') and todayRow[col] > prevRows[col].mean() * 3 and todayRow[col] > 1000 \
                 or col.endswith('Open') and todayRow[col] > prevRows[col].mean() * 1.5 and todayRow[col] > 10000:
                     
-                    dayChange = oSymb['change_pct']
-                    volIncrease = oSymb['vol_multi']
+                    dayChange = oSymb.iloc[-1]['change_pct']
+                    volIncrease = oSymb.iloc[-1]['vol_multi']
                     oOption = pd.read_csv(datapath / 'historical_option_daily/single/{}/{}.csv'.format(date, symb))
                 
                     longTermThres = (pd.Timestamp(date) + pd.DateOffset(months=1)).strftime("%Y-%m-%d")
