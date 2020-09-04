@@ -53,7 +53,7 @@ def visOptionsDist(datapath, figpath, symbs, dates=[]):
                     o1 = o0[o0['putCall'] == tp][['strikePrice','expirationDate', col]]
                     o1 = o1.fillna(0)
                     o1[col] = np.log10(o1[col] + 1)
-                    oDraw = o1.pivot('strikePrice','expirationDate', col).sort_index(ascending=False)
+                    oDraw = o1.pivot_table(index='strikePrice',columns='expirationDate',values=col).sort_index(ascending=False)
                     ax = sns.heatmap(oDraw, cmap=cmaps[j], ax=axs[i][j]);
                     oIdx = find_nearest_two(oDraw.index, openPrice)
                     hIdx = find_nearest_two(oDraw.index, highPrice)

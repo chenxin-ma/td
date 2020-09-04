@@ -18,7 +18,7 @@ def updateDB():
     # td.pullOptionDfForAll()
     # td.pullTodayPriceForAllBatch()
     # td.pullTodayPrice()
-    visOptionsDist(datapath, figpath, ['SPY'])
+    visOptionsDist(datapath, figpath, ['VXX'])
 
 
 def main():
