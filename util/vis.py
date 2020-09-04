@@ -27,8 +27,8 @@ def find_nearest_two(array, value):
 def visOptionsDist(datapath, figpath, symbs, dates=[]):
 
     if dates == []:
-        dates = [date for date in listdir(datapath / 'historical_option_daily/single/') 
-                 if not isfile(join(datapath / 'historical_option_daily/single', date))]
+        dates = sorted([date for date in listdir(datapath / 'historical_option_daily/single/') 
+                 if not isfile(join(datapath / 'historical_option_daily/single', date))])
 
     cols = ['totalVolume', 'openInterest']
     types = ['CALL', 'PUT']
@@ -57,7 +57,7 @@ def visOptionsDist(datapath, figpath, symbs, dates=[]):
                     o1 = o1.fillna(0)
                     o1[col] = np.log10(o1[col] + 1)
                     oDraw = o1.pivot_table(index='strikePrice',columns='expirationDate',values=col).sort_index(ascending=False)
-                    ax = sns.heatmap(oDraw, cmap=cmaps[j], ax=axs[i][j]);
+                    ax = sns.heatmap(oDraw, cmap=cmaps[j], vmax=6.01, ax=axs[i][j]);
                     if openPrice != -1:
                         oIdx = find_nearest_two(oDraw.index, openPrice)
                         hIdx = find_nearest_two(oDraw.index, highPrice)
@@ -69,7 +69,7 @@ def visOptionsDist(datapath, figpath, symbs, dates=[]):
                         ax.axhline(cIdx, color='k', linewidth=2, ls='--')
                     
                     cbar = ax.collections[0].colorbar
-                    maxTicks = int(np.round(o1[col].max())) + 1 
+                    maxTicks = 7#int(np.round(o1[col].max())) + 1 
                     cbar.set_ticks([i for i in range(maxTicks)])
                     cbar.set_ticklabels([0] + ['${10^%d}$' %i for i in range(1, maxTicks)])
 
