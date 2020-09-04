@@ -40,9 +40,12 @@ def visOptionsDist(datapath, figpath, symbs, dates=[]):
             o0 = o0[o0['expirationDate'] >= date]
             # o0 = o0[(o0['strikePrice'] > 300) & (o0['strikePrice'] < 500)]
 
-            oSingle = pd.read_csv(datapath / 'historical_daily/single/{}.csv'.format(symb))
-            datePrice = oSingle[oSingle['datetime'] == date]
-            openPrice,highPrice,lowPrice,closePrice = datePrice.values[0][:4]
+            try:
+                oSingle = pd.read_csv(datapath / 'historical_daily/single/{}.csv'.format(symb))
+                datePrice = oSingle[oSingle['datetime'] == date]
+                openPrice,highPrice,lowPrice,closePrice = datePrice.values[0][:4]
+            except:
+                openPrice,highPrice,lowPrice,closePrice = -1, -1, -1 ,-1
 
             fig, axs = plt.subplots(figsize=(24, 18), nrows=2, ncols=2)
             fig.subplots_adjust(wspace=0.01)
@@ -55,14 +58,15 @@ def visOptionsDist(datapath, figpath, symbs, dates=[]):
                     o1[col] = np.log10(o1[col] + 1)
                     oDraw = o1.pivot_table(index='strikePrice',columns='expirationDate',values=col).sort_index(ascending=False)
                     ax = sns.heatmap(oDraw, cmap=cmaps[j], ax=axs[i][j]);
-                    oIdx = find_nearest_two(oDraw.index, openPrice)
-                    hIdx = find_nearest_two(oDraw.index, highPrice)
-                    lIdx = find_nearest_two(oDraw.index, lowPrice)
-                    cIdx = find_nearest_two(oDraw.index, closePrice)
-                    ax.axhline(hIdx, color='brown', linewidth=2, ls=':')
-                    ax.axhline(lIdx, color='brown', linewidth=2, ls=':')
-                    ax.axhline(oIdx, color='k', linewidth=2, ls='-.')
-                    ax.axhline(cIdx, color='k', linewidth=2, ls='--')
+                    if openPrice != -1:
+                        oIdx = find_nearest_two(oDraw.index, openPrice)
+                        hIdx = find_nearest_two(oDraw.index, highPrice)
+                        lIdx = find_nearest_two(oDraw.index, lowPrice)
+                        cIdx = find_nearest_two(oDraw.index, closePrice)
+                        ax.axhline(hIdx, color='brown', linewidth=2, ls=':')
+                        ax.axhline(lIdx, color='brown', linewidth=2, ls=':')
+                        ax.axhline(oIdx, color='k', linewidth=2, ls='-.')
+                        ax.axhline(cIdx, color='k', linewidth=2, ls='--')
                     
                     cbar = ax.collections[0].colorbar
                     maxTicks = int(np.round(o1[col].max())) + 1 
