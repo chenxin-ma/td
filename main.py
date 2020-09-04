@@ -5,6 +5,7 @@ from config.config import *
 from api import *
 from dto import *
 from simulator import *
+from util import *
 import pandas as pd
 import argparse
 
@@ -14,9 +15,10 @@ def updateDB():
 
     td = TDAPI()
     # td.pullHistPriceForAll()
-    td.pullOptionDfForAll()
+    # td.pullOptionDfForAll()
     # td.pullTodayPriceForAllBatch()
     # td.pullTodayPrice()
+    visOptionsDist(datapath, figpath, ['SPY'])
 
 
 def main():

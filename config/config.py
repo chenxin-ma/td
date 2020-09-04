@@ -11,6 +11,8 @@ from tqdm import tqdm
 root = Path("/Users/chenxinma/Documents/projects/td/")
 datapath = root / 'data'
 
+figpath = root / 'figs'
+
 account_id = "425058922"
 consumer_id = "QQTKS5USJAZU7MQLS9EEPQ8L4QVAMAGH"
 
