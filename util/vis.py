@@ -24,6 +24,7 @@ def find_nearest_two(array, value):
     return idx
 
 
+
 def visOptionsDist(datapath, figpath, symbs, dates=[]):
 
     if dates == []:
@@ -33,12 +34,22 @@ def visOptionsDist(datapath, figpath, symbs, dates=[]):
     cols = ['totalVolume', 'openInterest']
     types = ['CALL', 'PUT']
     cmaps = ['YlGn', 'OrRd']
+    oAll = pd.read_csv(datapath / 'historical_option_daily/all.csv')
 
     for symb in symbs:
+        oS = oAll[oAll['symb'] == symb]
+        nOption = len(pd.read_csv(datapath / 'historical_option_daily/single/{}/{}.csv'.format(dates[-1], symb)))
+        cMapMaxVol = oS['ttlVol'].max() / nOption * 20
+        cMapMaxOpen = oS['ttlOpen'].max() / nOption * 20
+
         for date in dates:
-            o0 = pd.read_csv(datapath / 'historical_option_daily/single/{}/{}.csv'.format(date, symb))
-            o0 = o0[o0['expirationDate'] >= date]
-            # o0 = o0[(o0['strikePrice'] > 300) & (o0['strikePrice'] < 500)]
+            try:
+                o0 = pd.read_csv(datapath / 'historical_option_daily/single/{}/{}.csv'.format(date, symb))
+                o0 = o0[o0['expirationDate'] >= date]
+                # o0 = o0[(o0['strikePrice'] > 300) & (o0['strikePrice'] < 500)]
+
+            except:
+                continue
 
             try:
                 oSingle = pd.read_csv(datapath / 'historical_daily/single/{}.csv'.format(symb))
@@ -55,9 +66,15 @@ def visOptionsDist(datapath, figpath, symbs, dates=[]):
                 for j, tp in enumerate(types):
                     o1 = o0[o0['putCall'] == tp][['strikePrice','expirationDate', col]]
                     o1 = o1.fillna(0)
-                    o1[col] = np.log10(o1[col] + 1)
-                    oDraw = o1.pivot_table(index='strikePrice',columns='expirationDate',values=col).sort_index(ascending=False)
-                    ax = sns.heatmap(oDraw, cmap=cmaps[j], vmax=6.01, ax=axs[i][j]);
+                    # o1[col] = np.log10(o1[col] + 1)
+                    oDraw = o1.pivot_table(index='strikePrice',columns='expirationDate',values=col)\
+                              .sort_index(ascending=False)
+
+                    if col == 'totalVolume':
+                        vmax = cMapMaxVol
+                    else:
+                        vmax = cMapMaxOpen
+                    ax = sns.heatmap(oDraw, cmap=cmaps[j], vmax=vmax, ax=axs[i][j]);
                     if openPrice != -1:
                         oIdx = find_nearest_two(oDraw.index, openPrice)
                         hIdx = find_nearest_two(oDraw.index, highPrice)
@@ -68,10 +85,10 @@ def visOptionsDist(datapath, figpath, symbs, dates=[]):
                         ax.axhline(oIdx, color='k', linewidth=2, ls='-.')
                         ax.axhline(cIdx, color='k', linewidth=2, ls='--')
                     
-                    cbar = ax.collections[0].colorbar
-                    maxTicks = 7#int(np.round(o1[col].max())) + 1 
-                    cbar.set_ticks([i for i in range(maxTicks)])
-                    cbar.set_ticklabels([0] + ['${10^%d}$' %i for i in range(1, maxTicks)])
+                    # cbar = ax.collections[0].colorbar
+                    # maxTicks = 6#int(np.round(o1[col].max())) + 1 
+                    # cbar.set_ticks([i for i in range(maxTicks)])
+                    # cbar.set_ticklabels([0] + ['${10^%d}$' %i for i in range(1, maxTicks)])
 
             savepath = figpath / 'options_heat/{}'.format(symb)
             if not os.path.exists(savepath):
@@ -79,3 +96,4 @@ def visOptionsDist(datapath, figpath, symbs, dates=[]):
 
             fig.suptitle('%s, %s' %(symb, date), fontsize=18, x=0.45, y=0.9);
             fig.savefig(savepath / '{}.png'.format(date), dpi=150)
+            plt.close('all')
