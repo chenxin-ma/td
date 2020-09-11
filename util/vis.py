@@ -8,6 +8,7 @@ import numpy as np
 import os
 from os import listdir
 from os.path import isfile, join
+import mplfinance as mpf
 
 
 
@@ -40,7 +41,10 @@ def visOptionsDist(datapath, figpath, symbs, dates=[]):
         oS = oAll[oAll['symb'] == symb]
         nOption = len(pd.read_csv(datapath / 'historical_option_daily/single/{}/{}.csv'.format(dates[-1], symb)))
         cMapMaxVol = oS['ttlVol'].max() / nOption * 20
-        cMapMaxOpen = oS['ttlOpen'].max() / nOption * 20
+        cMapMaxOpen = oS['ttlOpen'].max() / nOption * 2 * np.log2(nOption)
+
+        optionVol = oS['ttlVol'].values
+        plotKChart(datapath, figpath, symb, optionVol)
 
         for date in dates:
             try:
@@ -97,3 +101,41 @@ def visOptionsDist(datapath, figpath, symbs, dates=[]):
             fig.suptitle('%s, %s' %(symb, date), fontsize=18, x=0.45, y=0.9);
             fig.savefig(savepath / '{}.png'.format(date), dpi=150)
             plt.close('all')
+
+
+def plotKChart(datapath, figpath, symb, optionVol, days=90):
+
+    try:
+        oSingle = pd.read_csv(datapath / 'historical_daily/single/{}.csv'.format(symb)
+                                    ,index_col=5,parse_dates=True).iloc[-days:]
+        oSingle.index.name = 'Date'
+    except:
+        return 
+
+    savepath = figpath / 'options_heat/{}'.format(symb)
+    if not os.path.exists(savepath):
+        os.makedirs(savepath)
+
+    optionVol = np.pad(optionVol, (days - len(optionVol), 0), 'constant')
+
+    apds = [
+            mpf.make_addplot(optionVol,type='bar', width=1,
+                         alpha=0.7, color='g',panel=1,secondary_y=False)
+           ]
+
+    save = dict(fname=str(savepath/'{}_candle.png'.format(symb)),
+                dpi=150,
+                pad_inches=0.1)
+
+    mc = mpf.make_marketcolors(up='g',down='r')
+    s = mpf.make_mpf_style(base_mpl_style='seaborn-whitegrid', marketcolors=mc)
+
+    mpf.plot(oSingle, type='candle', 
+        style=s,
+        title='%s' %symb,
+        volume=True,
+        panel_ratios=(3,1), 
+        figratio=(11,8),
+        addplot=apds,
+        savefig=save
+        )

@@ -16,9 +16,9 @@ def updateDB():
     td = TDAPI()
     # td.pullHistPriceForAll()
     # td.pullOptionDfForAll()
-    # td.pullTodayPriceForAllBatch()
+    td.pullTodayPriceForAllBatch()
     # td.pullTodayPrice()
-    visOptionsDist(datapath, figpath, ['AMZN'])
+    # visOptionsDist(datapath, figpath, ['BA'])
 
 
 def main():
