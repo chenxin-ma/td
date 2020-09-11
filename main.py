@@ -16,9 +16,12 @@ def updateDB():
     td = TDAPI()
     # td.pullHistPriceForAll()
     # td.pullOptionDfForAll()
-    td.pullTodayPriceForAllBatch()
+    # td.pullTodayPriceForAllBatch()
     # td.pullTodayPrice()
-    # visOptionsDist(datapath, figpath, ['BA'])
+
+    symb = 'ROKU'
+    plotKChart(datapath, figpath, symb, saving=False)
+    visOptionsDist(datapath, figpath, [symb])
 
 
 def main():
