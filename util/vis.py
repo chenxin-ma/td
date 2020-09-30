@@ -41,6 +41,10 @@ def visOptionsDist(datapath, figpath, symbs, dates=[]):
         oS = oAll[oAll['symb'] == symb]
         nOption = len(pd.read_csv(datapath / 'historical_option_daily/single/{}/{}.csv'.format(dates[-1], symb)))
 
+        savepath = figpath / 'options_heat/{}'.format(symb)
+        if not os.path.exists(savepath):
+            os.makedirs(savepath)
+
         cMapMaxFile = figpath / 'options_heat/{}/cMapMax.npy'.format(symb)
         if os.path.exists(cMapMaxFile):
             with open(cMapMaxFile, 'rb') as f:
@@ -55,10 +59,6 @@ def visOptionsDist(datapath, figpath, symbs, dates=[]):
 
         optionVol = oS['ttlVol'].values
         plotKChart(datapath, figpath, symb, optionVol)
-
-        savepath = figpath / 'options_heat/{}'.format(symb)
-        if not os.path.exists(savepath):
-            os.makedirs(savepath)
 
         for date in dates:
             
@@ -140,8 +140,8 @@ def plotKChart(datapath, figpath, symb, optionVol=[], saving=True, days=90):
     optionVol = np.pad(optionVol, (days - len(optionVol), 0), 'constant')
 
     apds = [
-            mpf.make_addplot(optionVol,type='bar', width=1,
-                         alpha=0.7, color='g',panel=1)
+            mpf.make_addplot(optionVol,type='bar', width=0.7,
+                         alpha=0.7, color='C3',panel=1)
            ]
 
     save = dict(fname=str(savepath/'{}_candle.png'.format(symb)),

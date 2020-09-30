@@ -10,18 +10,19 @@ import pandas as pd
 import argparse
 
 
-def updateDB():
+def updateDB(symb):
 
 
     td = TDAPI()
     # td.pullHistPriceForAll()
-    # td.pullOptionDfForAll()
-    # td.pullTodayPriceForAllBatch()
+    td.pullTodayPriceForAllBatch()
+    td.pullOptionDfForAll()
     # td.pullTodayPrice()
 
-    symb = 'ROKU'
-    plotKChart(datapath, figpath, symb, saving=False)
-    visOptionsDist(datapath, figpath, [symb])
+    # symb = 'NVTA'
+    # plotKChart(datapath, figpath, symb, saving=False)
+    # visOptionsDist(datapath, figpath, ['BE', 'AVTR', 'APPN', 'TME'])
+    # visOptionsDist(datapath, figpath, [symb])
 
 
 def main():
@@ -73,9 +74,10 @@ def main():
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-m', '--mode', type=str, required=True, help="")
+    parser.add_argument('-s', '--symb', type=str, required=False, default='AAPL',help="")
     args = parser.parse_args()
 
     if args.mode == '1':
         main()
     elif args.mode == '2':
-        updateDB()
+        updateDB(args.symb)

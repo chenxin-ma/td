@@ -36,6 +36,8 @@ class TDAPI:
                            )
                 o0['datetime'] = o0['datetime'].astype(str).str.split(' ').str[0]
                 o0.to_csv(filename, index=False, float_format='%.3f')
+
+                self.pullTodayPrice([symb])
             except:
                 continue
 
@@ -87,7 +89,7 @@ class TDAPI:
         today_date = pd.Timestamp.now().strftime("%Y-%m-%d")
 
         if (len(symbList) == 0):
-            sybms = pd.read_csv(datapath / 'symbols/options.csv')['Symbol'].sort_values().values
+            sybms = pd.read_csv(datapath / 'symbols/all.csv')['Symbol'].sort_values().values
         else:
             sybms = symbList
         for i in tqdm(range(len(sybms))):
