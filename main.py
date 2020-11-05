@@ -21,7 +21,8 @@ def updateDB(symb):
 
     # symb = 'NVTA'
     # plotKChart(datapath, figpath, symb, saving=False)
-    # visOptionsDist(datapath, figpath, ['BE', 'AVTR', 'APPN', 'TME'])
+    # visOptionsDist(datapath, figpath, ['SPY','QQQ','BA'])
+    # visOptionsDist(datapath, figpath, ['BE', 'AVTR', 'APPN', 'BA', 'ROKU'])
     # visOptionsDist(datapath, figpath, [symb])
 
 
