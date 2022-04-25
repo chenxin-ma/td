@@ -9,6 +9,7 @@ from tqdm import tqdm
 
 
 root = Path("/Users/chenxinma/Documents/projects/td/")
+# root = Path("/home/ubuntu/td/")
 datapath = root / 'data'
 
 figpath = root / 'figs'

@@ -16,10 +16,10 @@ class TDAPI:
     def pullHistPriceForAll(self, symbList=[]):
         
         if (len(symbList) == 0):
-            # sybms = pd.read_csv(datapath / 'symbols/all.csv')['Symbol'].values
+            sybms = pd.read_csv(datapath / 'symbols/all.csv')['Symbol'].values
 
-            sybms = [f[:-4] for f in listdir(datapath / 'historical_daily/single_/') 
-                     if isfile(join(datapath / 'historical_daily/single_', f)) and f.endswith('.csv')]
+            # sybms = [f[:-4] for f in listdir(datapath / 'historical_daily/single_/') 
+            #          if isfile(join(datapath / 'historical_daily/single_', f)) and f.endswith('.csv')]
             sybms = sorted(sybms)
         else:
             sybms = symbList
@@ -136,6 +136,7 @@ class TDAPI:
         cols = ['putCall','description','bid','ask','mark','delta','gamma','theta','vega','rho',
             'totalVolume','openInterest','strikePrice','expirationDate']
         today_date = pd.Timestamp.now().strftime("%Y-%m-%d")
+        # today_date = "2021-11-28"
 
         if (len(symbList) == 0):
             sybms = pd.read_csv(datapath / 'symbols/options.csv')['Symbol'].sort_values().values
@@ -146,13 +147,15 @@ class TDAPI:
         if not os.path.exists(savepath):
             os.makedirs(savepath)
 
+        # checkpath = datapath / 'historical_option_daily/single/2021-07-09'
         for i in tqdm(range(len(sybms))):
             symb = sybms[i] 
             while 1:
                 try:
                     filename = savepath / '{}.csv'.format(symb)
+                    # checkname = checkpath / '{}.csv'.format(symb)
 
-                    if path.exists(filename):
+                    if path.exists(filename):# or not path.exists(checkname):
                         break
 
                     o0 = self.client.optionsDF(symb)
@@ -196,7 +199,7 @@ class TDAPI:
         for symb in tqdm(optSymb):
             o0 = pd.read_csv(datapath / 'historical_option_daily/single/{}/{}.csv'.format(date,symb) )
             d4 = o0.groupby('putCall')[['totalVolume','openInterest']].sum().unstack().values
-            if len(o0) <= 1:
+            if len(o0) <= 1 or len(d4) < 4:
                 continue
 
             ttlV = d4[0] + d4[1]

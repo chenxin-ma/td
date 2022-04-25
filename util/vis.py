@@ -50,8 +50,10 @@ def visOptionsDist(datapath, figpath, symbs, dates=[]):
             with open(cMapMaxFile, 'rb') as f:
                 cMapMaxVol, cMapMaxOpen = np.load(f)
         else:
-            cMapMaxVol = oS['ttlVol'].max() / nOption * 20
-            cMapMaxOpen = oS['ttlOpen'].max() / nOption * 2 * np.log2(nOption)
+            # cMapMaxVol = 50000
+            cMapMaxVol = oS.iloc[-100:]['ttlVol'].max() / nOption * 20
+            # cMapMaxOpen = 80000
+            cMapMaxOpen = oS.iloc[-100:]['ttlOpen'].max() / nOption * 2 * np.log2(nOption)
             if cMapMaxOpen > cMapMaxVol * 6:
                 cMapMaxOpen = cMapMaxVol * 6
             with open(cMapMaxFile, 'wb') as f:
@@ -60,8 +62,11 @@ def visOptionsDist(datapath, figpath, symbs, dates=[]):
         optionVol = oS['ttlVol'].values
         plotKChart(datapath, figpath, symb, optionVol)
 
-        for date in dates:
+        for idx, date in enumerate(dates[-200:]):
             
+            # if idx % 5 != 4:
+                # continue
+
             if os.path.exists(savepath / '{}.png'.format(date)):
                 continue
 
@@ -69,7 +74,6 @@ def visOptionsDist(datapath, figpath, symbs, dates=[]):
             try:
                 o0 = pd.read_csv(datapath / 'historical_option_daily/single/{}/{}.csv'.format(date, symb))
                 o0 = o0[o0['expirationDate'] >= date]
-                # o0 = o0[(o0['strikePrice'] > 300) & (o0['strikePrice'] < 500)]
 
             except:
                 continue
@@ -118,7 +122,7 @@ def visOptionsDist(datapath, figpath, symbs, dates=[]):
             plt.close('all')
 
 
-def plotKChart(datapath, figpath, symb, optionVol=[], saving=True, days=90):
+def plotKChart(datapath, figpath, symb, optionVol=[], saving=True, days=100):
 
     try:
         oSingle = pd.read_csv(datapath / 'historical_daily/single/{}.csv'.format(symb)
@@ -137,7 +141,10 @@ def plotKChart(datapath, figpath, symb, optionVol=[], saving=True, days=90):
     if not os.path.exists(savepath):
         os.makedirs(savepath)
 
-    optionVol = np.pad(optionVol, (days - len(optionVol), 0), 'constant')
+    if days - len(optionVol) > 0:
+        optionVol = np.pad(optionVol, (days - len(optionVol), 0), 'constant')
+    else:
+        optionVol = optionVol[-days:]
 
     apds = [
             mpf.make_addplot(optionVol,type='bar', width=0.7,
@@ -168,6 +175,98 @@ def plotKChart(datapath, figpath, symb, optionVol=[], saving=True, days=90):
             title='%s' %symb,
             volume=True,
             panel_ratios=(3,1), 
+            figratio=(11,8),
+            addplot=apds,
+            )
+
+
+def plotSingleOptionDailyPrice(datapath, figpath, optionName, saving=True):
+
+    symb, expirationDate, strikePrice, cp = optionName.split('_')
+    strikePrice = float(strikePrice)
+    cp = cp.upper() 
+
+    datesAvailable = [f for f in listdir(datapath / 'historical_option_daily/single/') 
+                     if not isfile(join(datapath / 'historical_option_daily/single/', f))]
+
+    datesAvailable = np.sort(datesAvailable)
+
+    rows = {}
+    for date in datesAvailable:
+
+        dailyDataFile = datapath / 'historical_option_daily/single/{}/{}.csv'.format(date, symb)
+        
+        if os.path.exists(dailyDataFile):
+
+            oDailyData = pd.read_csv(dailyDataFile)
+
+            rowCall = oDailyData[(oDailyData['putCall'] == 'CALL') & \
+                    (oDailyData['strikePrice'].between(strikePrice - 0.01, strikePrice + 0.01)) & \
+                    (oDailyData['expirationDate'] == expirationDate)].copy()
+
+            rowPut = oDailyData[(oDailyData['putCall'] == 'PUT') & \
+                    (oDailyData['strikePrice'].between(strikePrice - 0.01, strikePrice + 0.01)) & \
+                    (oDailyData['expirationDate'] == expirationDate)].copy()
+
+            if (len(rowCall) > 0 or len(rowPut) > 0):
+                if 'bid' in rowCall.columns and 'ask' in rowCall.columns:
+
+                    rowCall['callMarket'] = (rowCall['bid'] + rowCall['ask'] ) / 2 * 100
+                    putmarket = (rowPut.iloc[0]['bid'] + rowPut.iloc[0]['ask'] ) / 2 * 100
+                    rowCall['putMarket'] = putmarket
+                    rowCall['straddleMarket'] = rowCall['putMarket'] + rowCall['callMarket']
+
+                    rowCall['date'] = date
+                    
+                    rows[date] = rowCall
+
+    oOptionDaily = pd.concat([rows[date] for date in rows])
+    oOptionDaily['price'] = (oOptionDaily['bid'] + oOptionDaily['ask'] ) / 2
+
+    try:
+        oSingle = pd.read_csv(datapath / 'historical_daily/single/{}.csv'.format(symb)
+                                    ,parse_dates=False)
+    except:
+        return 
+
+    oOptionDailyMerge = oOptionDaily.merge(oSingle, how='left', left_on='date', right_on='datetime')
+    oOptionDailyMerge['datetime'] = pd.to_datetime(oOptionDailyMerge['datetime'])
+    oOptionDailyMerge = oOptionDailyMerge.set_index('datetime')
+    oOptionDailyMerge.index.name = 'Date'
+
+    oOptionDailyMerge.dropna(how='any', inplace=True)
+
+    apds = [
+            mpf.make_addplot(oOptionDailyMerge['straddleMarket'].values, 
+                # type='plot', 
+                width=2,
+                # alpha=0.7, 
+                color='C3',panel=1),
+            mpf.make_addplot(oOptionDailyMerge['callMarket'].values, 
+                # type='plot', 
+                width=1,
+                # alpha=0.7, 
+                color='C2',panel=1),
+            mpf.make_addplot(oOptionDailyMerge['putMarket'].values, 
+                # type='plot', 
+                width=1,
+                # alpha=0.7, 
+                color='C1',panel=1),
+            mpf.make_addplot(oOptionDailyMerge['close'].values, 
+                # type='plot', 
+                width=0,
+                # alpha=0.7, 
+                color='C4',panel=0)
+           ]
+
+    mc = mpf.make_marketcolors(up='g',down='r')
+    s = mpf.make_mpf_style(base_mpl_style='seaborn-whitegrid', marketcolors=mc)
+
+    mpf.plot(oOptionDailyMerge, type='candle', 
+            style=s,
+            title='%s' %symb,
+            volume=False,
+            panel_ratios=(1,1), 
             figratio=(11,8),
             addplot=apds,
             )

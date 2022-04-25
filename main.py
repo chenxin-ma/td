@@ -1,3 +1,4 @@
+#!/home/ubuntu/miniconda3/envs/td/bin/python
 import os
 from tqdm import tqdm
 from shutil import copyfile
@@ -9,22 +10,32 @@ from util import *
 import pandas as pd
 import argparse
 
+from pandas.tseries.offsets import Day, BDay
+from datetime import datetime
+
+
 
 def updateDB(symb):
 
 
+    bday=BDay()
+    today_date = pd.Timestamp.now().strftime("%Y-%m-%d").split("-")
+    is_business_day = bday.is_on_offset(datetime(int(today_date[0]),int(today_date[1]),int(today_date[2])))
+    # if not is_business_day:
+        # return
+
     td = TDAPI()
     # td.pullHistPriceForAll()
-    td.pullTodayPriceForAllBatch()
+    # td.pullTodayPriceForAllBatch()
     td.pullOptionDfForAll()
     # td.pullTodayPrice()
 
     # symb = 'NVTA'
     # plotKChart(datapath, figpath, symb, saving=False)
-    # visOptionsDist(datapath, figpath, ['SPY','QQQ','BA'])
-    # visOptionsDist(datapath, figpath, ['BE', 'AVTR', 'APPN', 'BA', 'ROKU'])
+    # visOptionsDist(datapath, figpath, ['VXRT'])
     # visOptionsDist(datapath, figpath, [symb])
 
+    # plotSingleOptionDailyPrice(datapath, figpath, 'ROKU_2021-06-18_400_put')
 
 def main():
 
@@ -77,6 +88,7 @@ if __name__ == "__main__":
     parser.add_argument('-m', '--mode', type=str, required=True, help="")
     parser.add_argument('-s', '--symb', type=str, required=False, default='AAPL',help="")
     args = parser.parse_args()
+
 
     if args.mode == '1':
         main()
