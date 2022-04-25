@@ -27,13 +27,13 @@ def updateDB(symb):
     td = TDAPI()
     # td.pullHistPriceForAll()
     # td.pullTodayPriceForAllBatch()
-    td.pullOptionDfForAll()
+    # td.pullOptionDfForAll()
     # td.pullTodayPrice()
 
-    # symb = 'NVTA'
+    symb = 'WMT'
     # plotKChart(datapath, figpath, symb, saving=False)
     # visOptionsDist(datapath, figpath, ['VXRT'])
-    # visOptionsDist(datapath, figpath, [symb])
+    visOptionsDist(datapath, figpath, [symb])
 
     # plotSingleOptionDailyPrice(datapath, figpath, 'ROKU_2021-06-18_400_put')
 

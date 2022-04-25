@@ -62,7 +62,7 @@ def visOptionsDist(datapath, figpath, symbs, dates=[]):
         optionVol = oS['ttlVol'].values
         plotKChart(datapath, figpath, symb, optionVol)
 
-        for idx, date in enumerate(dates[-200:]):
+        for idx, date in enumerate(dates[-30:]):
             
             # if idx % 5 != 4:
                 # continue
